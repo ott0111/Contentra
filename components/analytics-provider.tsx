@@ -6,6 +6,48 @@ import { fetchAnalytics, insertAnalytics } from "@/lib/db/analytics-browser";
 import { fetchYouTubeAnalytics, type YouTubeAnalyticsData } from "@/lib/db/youtube-analytics-browser";
 import { fetchSocialAnalytics } from "@/lib/db/social-analytics-browser";
 import type { ContentPerformance } from "@/types/analytics";
+
 const AnalyticsContext = createContext<{ records: ContentPerformance[]; youtube: YouTubeAnalyticsData; addPerformance: (record: Omit<ContentPerformance, "id">) => void }>({ records: [], youtube: { records: [], lastSyncedAt: null }, addPerformance: () => undefined });
-export function AnalyticsProvider({ children }: { children: ReactNode }) { const [records, setRecords] = useState<ContentPerformance[]>([]); const [youtube, setYoutube] = useState<YouTubeAnalyticsData>({ records: [], lastSyncedAt: null }); useEffect(() => { const load = async () => { const { data: { user } } = await createClient().auth.getUser(); if (!user) return; try { const userMigrationKey = `contentra_analytics_migrated_v1_${user.id}`; if (!localStorage.getItem(userMigrationKey)) { const legacy = JSON.parse(localStorage.getItem("contentra-analytics") || "[]") as ContentPerformance[]; for (const record of legacy) await insertAnalytics(user.id, record); localStorage.setItem(userMigrationKey, "true"); } } catch { /* Legacy migration failure must not hide server analytics. */ } const results = await Promise.allSettled([fetchAnalytics(), fetchYouTubeAnalytics(), fetchSocialAnalytics("instagram"), fetchSocialAnalytics("tiktok"), fetchSocialAnalytics("x")]); const contentAnalytics: ContentPerformance[] = results[0].status === "fulfilled" ? results[0].value : []; const youtubeAnalytics: YouTubeAnalyticsData = results[1].status === "fulfilled" ? results[1].value : { records: [], lastSyncedAt: null }; setYoutube(youtubeAnalytics); const socialAnalytics: ContentPerformance[] = results.slice(2).flatMap(result => result.status === "fulfilled" && Array.isArray(result.value) ? result.value : []); setRecords([...contentAnalytics, ...youtubeAnalytics.records, ...socialAnalytics]); }; void load(); }, []); const addPerformance = (record: Omit<ContentPerformance, "id">) => { const optimistic = { ...record, id: crypto.randomUUID() }; setRecords(current => [optimistic, ...current]); void (async () => { try { const { data: { user } } = await createClient().auth.getUser(); if (!user) throw new Error("Authentication required"); const saved = await insertAnalytics(user.id, record); setRecords(current => current.map(row => row.id === optimistic.id ? saved : row)); } catch { setRecords(current => current.filter(row => row.id !== optimistic.id)); } })(); }; return <AnalyticsContext.Provider value={{ records, youtube, addPerformance }}>{children}</AnalyticsContext.Provider>; }
+
+export function AnalyticsProvider({ children }: { children: ReactNode }) {
+  const [records, setRecords] = useState<ContentPerformance[]>([]);
+  const [youtube, setYoutube] = useState<YouTubeAnalyticsData>({ records: [], lastSyncedAt: null });
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await createClient().auth.getUser();
+      if (!user) return;
+      try {
+        const userMigrationKey = `contentra_analytics_migrated_v1_${user.id}`;
+        if (!localStorage.getItem(userMigrationKey)) {
+          const legacy = JSON.parse(localStorage.getItem("contentra-analytics") || "[]") as ContentPerformance[];
+          for (const record of legacy) await insertAnalytics(user.id, record);
+          localStorage.setItem(userMigrationKey, "true");
+        }
+      } catch { /* Legacy migration failure must not hide server analytics. */ }
+      const results = await Promise.allSettled([fetchAnalytics(), fetchYouTubeAnalytics(), fetchSocialAnalytics("instagram"), fetchSocialAnalytics("tiktok"), fetchSocialAnalytics("x"), fetchSocialAnalytics("twitch")]);
+      const contentAnalytics: ContentPerformance[] = results[0].status === "fulfilled" ? results[0].value : [];
+      const youtubeAnalytics: YouTubeAnalyticsData = results[1].status === "fulfilled" ? results[1].value : { records: [], lastSyncedAt: null };
+      setYoutube(youtubeAnalytics);
+      const socialAnalytics: ContentPerformance[] = results.slice(2).flatMap(result => result.status === "fulfilled" && Array.isArray(result.value) ? result.value : []);
+      setRecords([...contentAnalytics, ...youtubeAnalytics.records, ...socialAnalytics]);
+    };
+    void load();
+  }, []);
+  const addPerformance = (record: Omit<ContentPerformance, "id">) => {
+    const optimistic = { ...record, id: crypto.randomUUID() };
+    setRecords(current => [optimistic, ...current]);
+    void (async () => {
+      try {
+        const { data: { user } } = await createClient().auth.getUser();
+        if (!user) throw new Error("Authentication required");
+        const saved = await insertAnalytics(user.id, record);
+        setRecords(current => current.map(row => row.id === optimistic.id ? saved : row));
+      } catch {
+        setRecords(current => current.filter(row => row.id !== optimistic.id));
+      }
+    })();
+  };
+  return <AnalyticsContext.Provider value={{ records, youtube, addPerformance }}>{children}</AnalyticsContext.Provider>;
+}
+
 export const useAnalytics = () => useContext(AnalyticsContext);

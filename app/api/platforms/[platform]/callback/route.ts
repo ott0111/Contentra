@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSocialOAuthStateCookieName } from "@/lib/platforms/oauth-utils";
-import { exchangeSocialCode, fetchSocialAccount, getSocialConfig, saveSocialTokens, verifySocialState, type SocialPlatform } from "@/lib/platforms/social";
+import { exchangeSocialCode, fetchSocialAccount, getSocialConfig, saveSocialTokens, validateTwitchToken, verifySocialState, type SocialPlatform } from "@/lib/platforms/social";
 
-const platforms = new Set<SocialPlatform>(["instagram", "tiktok", "x"]);
+const platforms = new Set<SocialPlatform>(["instagram", "tiktok", "x", "twitch"]);
 
 export async function GET(request: NextRequest, context: { params: Promise<{ platform: string }> }) {
   const platform = (await context.params).platform as SocialPlatform;
@@ -23,6 +23,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ pla
     if (!config) throw new Error(`${platform} OAuth is not configured`);
     const tokens = await exchangeSocialCode(platform, config, code, state);
     const account = await fetchSocialAccount(platform, tokens.accessToken);
+    if (platform === "twitch") {
+      const validated = await validateTwitchToken(tokens.accessToken);
+      if (validated.userId !== account.id) throw new Error("Twitch token user validation failed");
+    }
     await saveSocialTokens(user.id, platform, account, tokens);
     const response = NextResponse.redirect(`${redirectTo}?success=connected`);
     response.cookies.delete(getSocialOAuthStateCookieName());

@@ -16,6 +16,7 @@ http://localhost:3000/api/platforms/youtube/callback
 http://localhost:3000/api/platforms/instagram/callback
 http://localhost:3000/api/platforms/tiktok/callback
 http://localhost:3000/api/platforms/x/callback
+http://localhost:3000/api/platforms/twitch/callback
 ```
 
 Set the matching provider-specific redirect variable to the local URL when using an explicit override. If it is unset, the app builds the callback from `NEXT_PUBLIC_BASE_URL`, which defaults to `http://localhost:3000`.
@@ -50,6 +51,9 @@ TIKTOK_OAUTH_REDIRECT_URI
 X_CLIENT_ID
 X_CLIENT_SECRET
 X_OAUTH_REDIRECT_URI
+TWITCH_CLIENT_ID
+TWITCH_CLIENT_SECRET
+TWITCH_OAUTH_REDIRECT_URI
 PAYPAL_CLIENT_ID
 PAYPAL_CLIENT_SECRET
 PAYPAL_ENVIRONMENT
@@ -76,6 +80,7 @@ https://YOUR-DOMAIN/api/platforms/youtube/callback
 https://YOUR-DOMAIN/api/platforms/instagram/callback
 https://YOUR-DOMAIN/api/platforms/tiktok/callback
 https://YOUR-DOMAIN/api/platforms/x/callback
+https://YOUR-DOMAIN/api/platforms/twitch/callback
 ```
 
 The application also supports explicit provider-specific redirect variables. Set them to the exact production callback when a provider console requires a fixed value. Otherwise, leave them unset and the app derives callbacks from `NEXT_PUBLIC_BASE_URL`.
@@ -96,6 +101,7 @@ Replace `YOUR-DOMAIN` only in deployment configuration and provider consoles. Th
 - Instagram uses Meta OAuth and requires a Professional Instagram account linked to a Facebook Page.
 - TikTok requires Login Kit approval and the scopes used by the integration.
 - X requires OAuth 2.0 with `tweet.read`, `users.read`, and `offline.access`.
+- Twitch requires a registered application at `https://dev.twitch.tv/console/apps`, with `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, and the exact callback URL configured. Contentra requests only `moderator:read:followers`.
 
 Third-party OAuth is not considered verified until the corresponding provider console is configured and a real connection flow succeeds.
 

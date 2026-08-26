@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { beginSocialState, getSocialConfig, socialAuthUrl, type SocialPlatform } from "@/lib/platforms/social";
 
-const platforms = new Set<SocialPlatform>(["instagram", "tiktok", "x"]);
+const platforms = new Set<SocialPlatform>(["instagram", "tiktok", "x", "twitch"]);
 
 export async function GET(request: Request, context: { params: Promise<{ platform: string }> }) {
   const platform = (await context.params).platform as SocialPlatform;

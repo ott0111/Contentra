@@ -104,7 +104,7 @@ export default function AnalyticsDashboard() {
             className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm"
           >
             <option>All</option>
-            {["X", "TikTok", "Instagram", "YouTube"].map((value) => (
+            {["X", "TikTok", "Instagram", "YouTube", "Twitch"].map((value) => (
               <option key={value}>{value}</option>
             ))}
           </select>
@@ -202,7 +202,7 @@ export default function AnalyticsDashboard() {
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
                 <h2 className="font-bold">Performance by platform</h2>
                 <div className="mt-4 space-y-4">
-                  {["X", "TikTok", "Instagram", "YouTube"].map((value) => {
+                  {["X", "TikTok", "Instagram", "YouTube", "Twitch"].map((value) => {
                     const rows = filtered.filter(
                       (record) =>
                         record.platform === value ||

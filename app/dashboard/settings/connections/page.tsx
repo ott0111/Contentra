@@ -87,7 +87,7 @@ function ConnectionsContent() {
   };
 
   const sync = async (platform: PlatformName) => {
-    if (!["YouTube", "Instagram", "TikTok", "X"].includes(platform)) return;
+    if (!["YouTube", "Instagram", "TikTok", "X", "Twitch"].includes(platform)) return;
 
     try {
       setSyncing(true);
@@ -124,7 +124,7 @@ function ConnectionsContent() {
     );
 
   const connect = (platform: PlatformName) => {
-    if (["YouTube", "Instagram", "TikTok", "X"].includes(platform)) {
+    if (["YouTube", "Instagram", "TikTok", "X", "Twitch"].includes(platform)) {
       const slug = platform.toLowerCase();
       window.location.href = slug === "youtube" ? "/api/connections/youtube/connect" : `/api/platforms/${slug}/connect`;
     } else {
@@ -227,7 +227,7 @@ function ConnectionsContent() {
                   ) : (
                     <>
                       <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                        {["YouTube", "Instagram", "TikTok", "X"].includes(platform)
+                        {["YouTube", "Instagram", "TikTok", "X", "Twitch"].includes(platform)
                           ? `Connect your ${platform} account to sync official analytics.`
                           : "This integration is not configured yet."}
                       </p>
@@ -236,7 +236,7 @@ function ConnectionsContent() {
                         disabled={syncing}
                         className="mt-6 w-full rounded-xl border border-[var(--border)] bg-[var(--purple-light)] px-4 py-2.5 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
                       >
-                        {["YouTube", "Instagram", "TikTok", "X"].includes(platform) ? `Connect ${platform}` : "Coming Soon"}
+                        {["YouTube", "Instagram", "TikTok", "X", "Twitch"].includes(platform) ? `Connect ${platform}` : "Coming Soon"}
                       </button>
                     </>
                   )}
