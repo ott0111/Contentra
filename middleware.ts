@@ -30,4 +30,4 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-export const config = { matcher: ["/dashboard/:path*", "/login", "/signup", "/onboarding", "/auth/:path*"] };
+export const config = { matcher: ["/dashboard/:path*", "/login", "/signup", "/onboarding", "/auth/:path*", "/api/connections/youtube/callback", "/api/platforms/youtube/callback"] };
