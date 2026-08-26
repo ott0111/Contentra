@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <main className="flex min-h-screen items-center justify-center bg-[var(--background)] px-5 text-center"><div><p className="text-sm font-bold uppercase tracking-wider text-[var(--purple-light)]">Contentra</p><h1 className="mt-4 text-4xl font-bold">Page not found</h1><p className="mt-3 text-[var(--muted)]">That page doesn&apos;t exist or is no longer available.</p><Link href="/" className="mt-6 inline-block rounded-xl bg-[var(--purple)] px-4 py-3 text-sm font-bold">Go home</Link></div></main>; }

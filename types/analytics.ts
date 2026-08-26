@@ -1,0 +1,3 @@
+export type ContentPerformance = { id: string; contentId: string; platform?: string; views: number; impressions?: number; reach?: number; likes: number; comments: number; shares: number; saves: number; followersGained: number; followersLost?: number; followers?: number; watchTimeMinutes?: number; averageViewDurationSeconds?: number; recordedAt: string };
+export type AnalyticsSummary = { totalViews: number; totalLikes: number; totalComments: number; totalShares: number; totalSaves: number; followersGained: number; engagementRate: number };
+export type PerformanceTrend = { date: string; views: number; likes: number; comments: number; shares: number; followers: number };

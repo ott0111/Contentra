@@ -1,0 +1,2 @@
+export type ContentStatus = "IDEA" | "DRAFT" | "SCHEDULED" | "PUBLISHED" | "ARCHIVED";
+export type ContentItem = { id: string; title: string; body: string; contentType: string; platform: string; status: ContentStatus; tags: string[]; createdAt: string; updatedAt: string; scheduledAt: string | null };

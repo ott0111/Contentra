@@ -1,0 +1,6 @@
+import { createClient } from "@/lib/supabase/browser";
+import type { ContentPerformance } from "@/types/analytics";
+
+function map(row: Record<string, unknown>): ContentPerformance { return { id: String(row.id), contentId: String(row.content_id), views: Number(row.views || 0), likes: Number(row.likes || 0), comments: Number(row.comments || 0), shares: Number(row.shares || 0), saves: Number(row.saves || 0), followersGained: Number(row.followers_gained || 0), recordedAt: String(row.recorded_at) }; }
+export async function fetchAnalytics() { const { data, error } = await createClient().from("content_analytics").select("*").order("recorded_at", { ascending: false }); if (error) throw error; return (data || []).map(map); }
+export async function insertAnalytics(userId: string, record: Omit<ContentPerformance, "id">) { const { data, error } = await createClient().from("content_analytics").insert({ user_id: userId, content_id: record.contentId, views: record.views, likes: record.likes, comments: record.comments, shares: record.shares, saves: record.saves, followers_gained: record.followersGained, recorded_at: record.recordedAt }).select().single(); if (error) throw error; return map(data); }

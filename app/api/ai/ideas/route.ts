@@ -1,0 +1,6 @@
+import { NextResponse } from "next/server";
+import { askAI } from "@/lib/ai/openai";
+import { buildIdeaGenerationPrompt } from "@/lib/ai/prompts";
+import { parseIdeas } from "@/lib/ai/schemas";
+import { recordAIUsage, reserveAIUsage } from "@/lib/billing/usage";
+export async function POST(request: Request) { try { const body = await request.json(); const usage = await reserveAIUsage("ideas"); if (!usage.user) return NextResponse.json({ error: usage.error }, { status: usage.error === "Please log in to use AI." ? 401 : 429 }); if (!body?.profile) return NextResponse.json({ error: "Creator profile is required." }, { status: 400 }); const raw = await askAI(buildIdeaGenerationPrompt(body.settings, body.profile)); if (!raw) return NextResponse.json({ error: "AI is not configured. Add OPENAI_API_KEY to enable ideas." }, { status: 503 }); const parsed = JSON.parse(raw); const result = parseIdeas(Array.isArray(parsed) ? parsed : parsed.ideas); if (result) await recordAIUsage(usage.user.id, "ideas"); return result ? NextResponse.json(result) : NextResponse.json({ error: "Contentra received invalid ideas. Try again." }, { status: 502 }); } catch { return NextResponse.json({ error: "Contentra couldn't generate ideas right now. Try again." }, { status: 500 }); } }

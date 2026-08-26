@@ -1,0 +1,7 @@
+import type { AnalysisCategory, ContentAnalysis } from "@/types/analyzer";
+
+const weights: Record<keyof Pick<ContentAnalysis, "hook" | "clarity" | "value" | "engagement" | "shareability" | "cta">, number> = { hook: 0.2, clarity: 0.15, value: 0.2, engagement: 0.2, shareability: 0.15, cta: 0.1 };
+
+export function clampScore(value: unknown) { const score = typeof value === "number" && Number.isFinite(value) ? value : 0; return Math.max(0, Math.min(100, Math.round(score))); }
+export function calculateOverallScore(categories: Pick<ContentAnalysis, keyof typeof weights>) { return Math.round((Object.keys(weights) as Array<keyof typeof weights>).reduce((total, key) => total + clampScore(categories[key].score) * weights[key], 0)); }
+export function sanitizeCategory(value: unknown): AnalysisCategory { const row = value && typeof value === "object" ? value as Record<string, unknown> : {}; const list = (entry: unknown) => Array.isArray(entry) ? entry.filter(item => typeof item === "string" && item.trim()).map(item => item.trim()).slice(0, 5) : []; return { score: clampScore(row.score), strengths: list(row.strengths), weaknesses: list(row.weaknesses), recommendations: list(row.recommendations) }; }

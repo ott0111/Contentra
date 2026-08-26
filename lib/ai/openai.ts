@@ -1,0 +1,3 @@
+import OpenAI from "openai";
+export const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+export async function askAI(prompt: string) { if (!openai) return null; const response = await openai.chat.completions.create({ model: "gpt-4o-mini", temperature: 0.8, response_format: { type: "json_object" }, messages: [{ role: "system", content: "You are Contentra, a concise content strategist for creators." }, { role: "user", content: prompt }] }); return response.choices[0]?.message.content || null; }
