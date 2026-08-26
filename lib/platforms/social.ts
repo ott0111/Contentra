@@ -76,6 +76,20 @@ async function jsonRequest(url: string, init?: RequestInit) {
   return data as Record<string, unknown>;
 }
 
+async function instagramDiagnosticRequest(url: string, label: string, pageName?: string) {
+  const response = await fetch(url, { cache: "no-store" });
+  const data = await response.json().catch(() => ({})) as Record<string, unknown>;
+  const error = data.error as Record<string, unknown> | undefined;
+  console.info("Instagram OAuth discovery", {
+    endpoint: label,
+    status: response.status,
+    ...(pageName ? { pageName } : {}),
+    ...(error ? { metaError: { code: error.code ?? null, type: error.type ?? null, message: error.message ?? null } } : {}),
+  });
+  if (!response.ok) throw new Error(typeof error?.message === "string" ? error.message : `Instagram request failed (${response.status})`);
+  return data;
+}
+
 export async function exchangeSocialCode(platform: SocialPlatform, config: ProviderConfig, code: string, codeVerifier?: string): Promise<{ accessToken: string; refreshToken?: string; expiresIn?: number; scope?: string }> {
   if (platform === "instagram") {
     const data = await jsonRequest("https://graph.facebook.com/v23.0/oauth/access_token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: config.clientId, client_secret: config.clientSecret, redirect_uri: config.redirectUri, code }) });
@@ -101,15 +115,22 @@ export async function refreshSocialToken(platform: SocialPlatform, config: Provi
 
 export async function fetchSocialAccount(platform: SocialPlatform, accessToken: string): Promise<{ id: string; username: string; displayName?: string }> {
   if (platform === "instagram") {
-    const pagesData = await jsonRequest(`https://graph.facebook.com/v23.0/me/accounts?fields=id,name,access_token&access_token=${encodeURIComponent(accessToken)}`);
+    const pagesData = await instagramDiagnosticRequest(`https://graph.facebook.com/v23.0/me/accounts?fields=id,name,access_token&access_token=${encodeURIComponent(accessToken)}`, "me/accounts");
     const pages = (pagesData.data as Array<Record<string, unknown>> | undefined) || [];
+    console.info("Instagram OAuth discovery", {
+      endpoint: "me/accounts summary",
+      pageCount: pages.length,
+      pages: pages.map(page => ({ name: typeof page.name === "string" ? page.name : null, hasAccessToken: typeof page.access_token === "string" && page.access_token.length > 0 })),
+    });
     let account: { id?: string } | undefined;
     for (const candidate of pages) {
       const pageId = typeof candidate.id === "string" ? candidate.id : "";
       if (!pageId) continue;
       const pageToken = typeof candidate.access_token === "string" ? candidate.access_token : accessToken;
-      const pageData = await jsonRequest(`https://graph.facebook.com/v23.0/${pageId}?fields=id,name,instagram_business_account&access_token=${encodeURIComponent(pageToken)}`);
+      const pageName = typeof candidate.name === "string" ? candidate.name : "Unknown Page";
+      const pageData = await instagramDiagnosticRequest(`https://graph.facebook.com/v23.0/${pageId}?fields=id,name,instagram_business_account&access_token=${encodeURIComponent(pageToken)}`, "page lookup", pageName);
       const candidateAccount = pageData.instagram_business_account as { id?: string } | undefined;
+      console.info("Instagram OAuth discovery", { endpoint: "page lookup result", pageName, hasInstagramBusinessAccount: Boolean(candidateAccount?.id) });
       if (candidateAccount?.id) {
         account = candidateAccount;
         break;
