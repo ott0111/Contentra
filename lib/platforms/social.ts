@@ -37,7 +37,7 @@ export function getSocialConfig(platform: SocialPlatform): ProviderConfig | null
 
 export function socialAuthUrl(platform: SocialPlatform, config: ProviderConfig, state: string): string {
   if (platform === "instagram") {
-    const query = new URLSearchParams({ client_id: config.clientId, redirect_uri: config.redirectUri, response_type: "code", scope: "instagram_basic,instagram_manage_insights,pages_show_list,pages_read_engagement", state });
+    const query = new URLSearchParams({ client_id: config.clientId, config_id: process.env.META_CONFIG_ID || "", redirect_uri: config.redirectUri, response_type: "code", scope: "instagram_basic,instagram_manage_insights,pages_show_list,pages_read_engagement", state });
     return `https://www.facebook.com/v23.0/dialog/oauth?${query}`;
   }
   if (platform === "tiktok") {
