@@ -101,9 +101,20 @@ export async function refreshSocialToken(platform: SocialPlatform, config: Provi
 
 export async function fetchSocialAccount(platform: SocialPlatform, accessToken: string): Promise<{ id: string; username: string; displayName?: string }> {
   if (platform === "instagram") {
-    const data = await jsonRequest(`https://graph.facebook.com/v23.0/me/accounts?fields=id,name,instagram_business_account&access_token=${encodeURIComponent(accessToken)}`);
-    const page = (data.data as Array<Record<string, unknown>> | undefined)?.find(item => item.instagram_business_account);
-    const account = page?.instagram_business_account as { id?: string } | undefined;
+    const pagesData = await jsonRequest(`https://graph.facebook.com/v23.0/me/accounts?fields=id,name,access_token&access_token=${encodeURIComponent(accessToken)}`);
+    const pages = (pagesData.data as Array<Record<string, unknown>> | undefined) || [];
+    let account: { id?: string } | undefined;
+    for (const candidate of pages) {
+      const pageId = typeof candidate.id === "string" ? candidate.id : "";
+      if (!pageId) continue;
+      const pageToken = typeof candidate.access_token === "string" ? candidate.access_token : accessToken;
+      const pageData = await jsonRequest(`https://graph.facebook.com/v23.0/${pageId}?fields=id,name,instagram_business_account&access_token=${encodeURIComponent(pageToken)}`);
+      const candidateAccount = pageData.instagram_business_account as { id?: string } | undefined;
+      if (candidateAccount?.id) {
+        account = candidateAccount;
+        break;
+      }
+    }
     if (!account?.id) throw new Error("Instagram requires a connected Professional account and Facebook Page.");
     const profile = await jsonRequest(`https://graph.facebook.com/v23.0/${account.id}?fields=id,username,name&access_token=${encodeURIComponent(accessToken)}`);
     return { id: String(profile.id), username: String(profile.username || profile.name || "Instagram account"), displayName: String(profile.name || "") };
