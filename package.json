@@ -1,0 +1,32 @@
+{
+  "name": "contentra",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @contentra/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @contentra/api prisma:generate",
+    "db:migrate": "pnpm --filter @contentra/api prisma:migrate",
+    "db:seed": "pnpm --filter @contentra/api prisma:seed",
+    "validate": "pnpm db:generate && pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "dev:web": "pnpm --filter @contentra/web dev",
+    "build:web": "pnpm --filter @contentra/web build",
+    "typecheck:web": "pnpm --filter @contentra/web typecheck"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@typescript-eslint/parser": "^8.70.0",
+    "eslint": "^9.26.0",
+    "prisma": "^6.19.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

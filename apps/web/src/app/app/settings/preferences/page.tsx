@@ -1,0 +1,2 @@
+import { SettingsPreferencePage } from '@/components/settings-preference-page';
+export default function Page() { return <SettingsPreferencePage section="preferences" title="Preferences" description="Set your default planning and publishing preferences." fields={[{ key: 'timezone', label: 'Timezone', placeholder: 'America/Toronto' }, { key: 'region', label: 'Region', placeholder: 'Canada' }, { key: 'postingCadence', label: 'Posting cadence', placeholder: '3 times per week' }]} />; }

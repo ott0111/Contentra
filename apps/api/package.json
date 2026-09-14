@@ -1,0 +1,38 @@
+{
+  "name": "@contentra/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --import tsx --env-file=../../.env src/server.ts",
+    "worker": "tsx --env-file=../../.env src/worker.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "prisma:generate": "prisma generate --schema=../../prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=../../prisma/schema.prisma",
+    "prisma:seed": "tsx --env-file=../../.env prisma/seed.ts",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@contentra/ai": "workspace:*",
+    "@contentra/config": "workspace:*",
+    "@contentra/core": "workspace:*",
+    "@contentra/integrations": "workspace:*",
+    "@contentra/processing": "workspace:*",
+    "@contentra/types": "workspace:*",
+    "@contentra/validation": "workspace:*",
+    "@prisma/client": "^6.19.3",
+    "argon2": "^0.41.1",
+    "fastify": "^5.3.2",
+    "fastify-raw-body": "^5.0.0",
+    "pino": "^9.6.0",
+    "zod": "^3.25.56"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.3",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

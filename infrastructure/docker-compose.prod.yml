@@ -1,0 +1,63 @@
+# REFERENCE docker-compose — NOT VALIDATED IN THIS ENVIRONMENT
+# Self-host reference topology: postgres + api + worker + web.
+# Secrets arrive via the .env file referenced below (NOT committed).
+# All values are placeholders; see docs/production.md and docs/providers.md.
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: contentra
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set}
+      POSTGRES_DB: contentra
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contentra"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.api
+    restart: unless-stopped
+    env_file: ../.env.production
+    environment:
+      DATABASE_URL: postgresql://contentra:${POSTGRES_PASSWORD:?set}@db:5432/contentra
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.api
+    restart: unless-stopped
+    command: ["node", "--import", "tsx", "apps/api/src/worker.ts"]
+    env_file: ../.env.production
+    environment:
+      DATABASE_URL: postgresql://contentra:${POSTGRES_PASSWORD:?set}@db:5432/contentra
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_DEVELOPMENT_PREVIEW: "0"
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

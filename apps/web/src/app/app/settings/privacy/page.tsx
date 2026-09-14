@@ -1,0 +1,2 @@
+import { SettingsPreferencePage } from '@/components/settings-preference-page';
+export default function Page() { return <SettingsPreferencePage section="privacy" title="Privacy" description="Control privacy preferences stored with your account." fields={[{ key: 'analyticsVisibility', label: 'Analytics visibility', placeholder: 'workspace only' }, { key: 'dataRetention', label: 'Data retention preference', placeholder: 'standard' }]} />; }

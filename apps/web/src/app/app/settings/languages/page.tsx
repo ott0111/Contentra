@@ -1,0 +1,2 @@
+import { SettingsPreferencePage } from '@/components/settings-preference-page';
+export default function Page() { return <SettingsPreferencePage section="languages" title="Languages" description="Choose interface and content language preferences." fields={[{ key: 'interfaceLanguage', label: 'Interface language', placeholder: 'English' }, { key: 'contentLanguage', label: 'Content language', placeholder: 'English' }]} />; }

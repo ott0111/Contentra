@@ -1,0 +1,1 @@
+export interface Publisher{validate(input:unknown):Promise<void>;publish(input:unknown):Promise<{externalId:string;status:'QUEUED'|'PROCESSING'|'PUBLISHED'|'FAILED'|'CANCELLED'}>;getStatus(externalId:string):Promise<{status:string}>;cancel(externalId:string):Promise<void>}

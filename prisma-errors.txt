@@ -1,0 +1,483 @@
+Prisma schema loaded from ..\..\prisma\schema.prisma
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:113[0m
+[1;94m   | [0m
+[1;94m112 | [0m}
+[1;94m113 | [0m[1;91mmodel Session { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }[0m
+[1;94m114 | [0mmodel VerificationToken { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:114[0m
+[1;94m   | [0m
+[1;94m113 | [0mmodel Session { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }
+[1;94m114 | [0m[1;91mmodel VerificationToken { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }[0m
+[1;94m115 | [0mmodel PasswordResetToken { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:115[0m
+[1;94m   | [0m
+[1;94m114 | [0mmodel VerificationToken { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }
+[1;94m115 | [0m[1;91mmodel PasswordResetToken { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }[0m
+[1;94m116 | [0mmodel Account { id String @id @default(uuid()); userId String; provider String; providerAccountId String; passwordHash String?; accessTokenEncrypted String?; refreshTokenEncrypted String?; expiresAt DateTime?; scopes String[]; user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@unique([provider,providerAccountId]); @@index([userId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:116[0m
+[1;94m   | [0m
+[1;94m115 | [0mmodel PasswordResetToken { id String @id @default(uuid()); userId String; tokenHash String @unique; expiresAt DateTime; usedAt DateTime?; createdAt DateTime @default(now()); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([userId,expiresAt]) }
+[1;94m116 | [0m[1;91mmodel Account { id String @id @default(uuid()); userId String; provider String; providerAccountId String; passwordHash String?; accessTokenEncrypted String?; refreshTokenEncrypted String?; expiresAt DateTime?; scopes String[]; user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@unique([provider,providerAccountId]); @@index([userId]) }[0m
+[1;94m117 | [0m model Workspace { id String @id @default(uuid()); name String; type WorkspaceType; ownerId String; settings Json?; brandContext Json?; onboardingState Json?; onboardedAt DateTime?; createdAt DateTime @default(now()); owner User @relation("WorkspaceOwner",fields:[ownerId],references:[id]); members WorkspaceMember[]; subscription Subscription?; brandProfile BrandProfile?; brandIntelligence BrandIntelligence[]; audienceProfiles AudienceProfile[]; brandVoices BrandVoice[]; contentDNA ContentDNA[]; socialAccounts SocialAccount[]; websites Website[]; businessIntegrations BusinessIntegration[]; contents Content[]; collections ContentCollection[]; calendarItems CalendarItem[]; campaigns Campaign[]; trends Trend[]; opportunities Opportunity[]; recommendations Recommendation[]; nextBestActions NextBestAction[]; aiConversations AIConversation[]; aiUsage AIUsage[]; aiCreditBalance AICreditBalance?; notifications Notification[]; notificationPreferences NotificationPreference[]; deviceRegistrations DeviceRegistration[]; apiKeys APIKey[]; webhooks Webhook[]; integrationEvents IntegrationEvent[]; auditLogs AuditLog[]; assets ContentAsset[]; jobs Job[]; @@index([ownerId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:117[0m
+[1;94m   | [0m
+[1;94m116 | [0mmodel Account { id String @id @default(uuid()); userId String; provider String; providerAccountId String; passwordHash String?; accessTokenEncrypted String?; refreshTokenEncrypted String?; expiresAt DateTime?; scopes String[]; user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@unique([provider,providerAccountId]); @@index([userId]) }
+[1;94m117 | [0m [1;91mmodel Workspace { id String @id @default(uuid()); name String; type WorkspaceType; ownerId String; settings Json?; brandContext Json?; onboardingState Json?; onboardedAt DateTime?; createdAt DateTime @default(now()); owner User @relation("WorkspaceOwner",fields:[ownerId],references:[id]); members WorkspaceMember[]; subscription Subscription?; brandProfile BrandProfile?; brandIntelligence BrandIntelligence[]; audienceProfiles AudienceProfile[]; brandVoices BrandVoice[]; contentDNA ContentDNA[]; socialAccounts SocialAccount[]; websites Website[]; businessIntegrations BusinessIntegration[]; contents Content[]; collections ContentCollection[]; calendarItems CalendarItem[]; campaigns Campaign[]; trends Trend[]; opportunities Opportunity[]; recommendations Recommendation[]; nextBestActions NextBestAction[]; aiConversations AIConversation[]; aiUsage AIUsage[]; aiCreditBalance AICreditBalance?; notifications Notification[]; notificationPreferences NotificationPreference[]; deviceRegistrations DeviceRegistration[]; apiKeys APIKey[]; webhooks Webhook[]; integrationEvents IntegrationEvent[]; auditLogs AuditLog[]; assets ContentAsset[]; jobs Job[]; @@index([ownerId]) }[0m
+[1;94m118 | [0mmodel WorkspaceInvite { id String @id @default(uuid()); workspaceId String; email String; role WorkspaceRole; tokenHash String @unique; expiresAt DateTime; acceptedAt DateTime?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,email]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:118[0m
+[1;94m   | [0m
+[1;94m117 | [0m model Workspace { id String @id @default(uuid()); name String; type WorkspaceType; ownerId String; settings Json?; brandContext Json?; onboardingState Json?; onboardedAt DateTime?; createdAt DateTime @default(now()); owner User @relation("WorkspaceOwner",fields:[ownerId],references:[id]); members WorkspaceMember[]; subscription Subscription?; brandProfile BrandProfile?; brandIntelligence BrandIntelligence[]; audienceProfiles AudienceProfile[]; brandVoices BrandVoice[]; contentDNA ContentDNA[]; socialAccounts SocialAccount[]; websites Website[]; businessIntegrations BusinessIntegration[]; contents Content[]; collections ContentCollection[]; calendarItems CalendarItem[]; campaigns Campaign[]; trends Trend[]; opportunities Opportunity[]; recommendations Recommendation[]; nextBestActions NextBestAction[]; aiConversations AIConversation[]; aiUsage AIUsage[]; aiCreditBalance AICreditBalance?; notifications Notification[]; notificationPreferences NotificationPreference[]; deviceRegistrations DeviceRegistration[]; apiKeys APIKey[]; webhooks Webhook[]; integrationEvents IntegrationEvent[]; auditLogs AuditLog[]; assets ContentAsset[]; jobs Job[]; @@index([ownerId]) }
+[1;94m118 | [0m[1;91mmodel WorkspaceInvite { id String @id @default(uuid()); workspaceId String; email String; role WorkspaceRole; tokenHash String @unique; expiresAt DateTime; acceptedAt DateTime?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,email]) }[0m
+[1;94m119 | [0mmodel WorkspaceMember { id String @id @default(uuid()); workspaceId String; userId String; role WorkspaceRole; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation("WorkspaceMemberships",fields:[userId],references:[id],onDelete:Cascade); @@unique([workspaceId,userId]); @@index([userId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:119[0m
+[1;94m   | [0m
+[1;94m118 | [0mmodel WorkspaceInvite { id String @id @default(uuid()); workspaceId String; email String; role WorkspaceRole; tokenHash String @unique; expiresAt DateTime; acceptedAt DateTime?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,email]) }
+[1;94m119 | [0m[1;91mmodel WorkspaceMember { id String @id @default(uuid()); workspaceId String; userId String; role WorkspaceRole; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation("WorkspaceMemberships",fields:[userId],references:[id],onDelete:Cascade); @@unique([workspaceId,userId]); @@index([userId]) }[0m
+[1;94m120 | [0mmodel Plan { id String @id @default(uuid()); code String @unique; name String; monthlyPriceCents Int; entitlements Entitlement[]; subscriptions Subscription[] }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:120[0m
+[1;94m   | [0m
+[1;94m119 | [0mmodel WorkspaceMember { id String @id @default(uuid()); workspaceId String; userId String; role WorkspaceRole; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation("WorkspaceMemberships",fields:[userId],references:[id],onDelete:Cascade); @@unique([workspaceId,userId]); @@index([userId]) }
+[1;94m120 | [0m[1;91mmodel Plan { id String @id @default(uuid()); code String @unique; name String; monthlyPriceCents Int; entitlements Entitlement[]; subscriptions Subscription[] }[0m
+[1;94m121 | [0mmodel Entitlement { id String @id @default(uuid()); planId String; feature String; limitValue Int?; plan Plan @relation(fields:[planId],references:[id],onDelete:Cascade); @@unique([planId,feature]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:121[0m
+[1;94m   | [0m
+[1;94m120 | [0mmodel Plan { id String @id @default(uuid()); code String @unique; name String; monthlyPriceCents Int; entitlements Entitlement[]; subscriptions Subscription[] }
+[1;94m121 | [0m[1;91mmodel Entitlement { id String @id @default(uuid()); planId String; feature String; limitValue Int?; plan Plan @relation(fields:[planId],references:[id],onDelete:Cascade); @@unique([planId,feature]) }[0m
+[1;94m122 | [0mmodel Subscription { id String @id @default(uuid()); workspaceId String @unique; planId String; provider String?; externalCustomerId String?; externalSubscriptionId String?; status String; currentPeriodEnd DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); plan Plan @relation(fields:[planId],references:[id]); }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:122[0m
+[1;94m   | [0m
+[1;94m121 | [0mmodel Entitlement { id String @id @default(uuid()); planId String; feature String; limitValue Int?; plan Plan @relation(fields:[planId],references:[id],onDelete:Cascade); @@unique([planId,feature]) }
+[1;94m122 | [0m[1;91mmodel Subscription { id String @id @default(uuid()); workspaceId String @unique; planId String; provider String?; externalCustomerId String?; externalSubscriptionId String?; status String; currentPeriodEnd DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); plan Plan @relation(fields:[planId],references:[id]); }[0m
+[1;94m123 | [0mmodel AICreditBalance { id String @id @default(uuid()); workspaceId String @unique; balance Int @default(0); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); transactions AICreditTransaction[] }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:123[0m
+[1;94m   | [0m
+[1;94m122 | [0mmodel Subscription { id String @id @default(uuid()); workspaceId String @unique; planId String; provider String?; externalCustomerId String?; externalSubscriptionId String?; status String; currentPeriodEnd DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); plan Plan @relation(fields:[planId],references:[id]); }
+[1;94m123 | [0m[1;91mmodel AICreditBalance { id String @id @default(uuid()); workspaceId String @unique; balance Int @default(0); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); transactions AICreditTransaction[] }[0m
+[1;94m124 | [0mmodel AICreditTransaction { id String @id @default(uuid()); balanceId String; workspaceId String; userId String?; amount Int; reason String; metadata Json?; createdAt DateTime @default(now()); balance AICreditBalance @relation(fields:[balanceId],references:[id],onDelete:Cascade); @@index([workspaceId,createdAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:124[0m
+[1;94m   | [0m
+[1;94m123 | [0mmodel AICreditBalance { id String @id @default(uuid()); workspaceId String @unique; balance Int @default(0); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); transactions AICreditTransaction[] }
+[1;94m124 | [0m[1;91mmodel AICreditTransaction { id String @id @default(uuid()); balanceId String; workspaceId String; userId String?; amount Int; reason String; metadata Json?; createdAt DateTime @default(now()); balance AICreditBalance @relation(fields:[balanceId],references:[id],onDelete:Cascade); @@index([workspaceId,createdAt]) }[0m
+[1;94m125 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:126[0m
+[1;94m   | [0m
+[1;94m125 | [0m
+[1;94m126 | [0m[1;91mmodel BrandProfile { id String @id @default(uuid()); workspaceId String @unique; name String?; description String?; websiteUrl String?; products Json?; services Json?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }[0m
+[1;94m127 | [0mmodel BrandIntelligence { id String @id @default(uuid()); workspaceId String; key String; value Json; source String; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@unique([workspaceId,key,version]); @@index([workspaceId,key]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:127[0m
+[1;94m   | [0m
+[1;94m126 | [0mmodel BrandProfile { id String @id @default(uuid()); workspaceId String @unique; name String?; description String?; websiteUrl String?; products Json?; services Json?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m127 | [0m[1;91mmodel BrandIntelligence { id String @id @default(uuid()); workspaceId String; key String; value Json; source String; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@unique([workspaceId,key,version]); @@index([workspaceId,key]) }[0m
+[1;94m128 | [0mmodel AudienceProfile { id String @id @default(uuid()); workspaceId String; name String?; targetAudience Json?; demographics Json?; painPoints Json?; interests Json?; goals Json?; problems Json?; source String?; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:128[0m
+[1;94m   | [0m
+[1;94m127 | [0mmodel BrandIntelligence { id String @id @default(uuid()); workspaceId String; key String; value Json; source String; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@unique([workspaceId,key,version]); @@index([workspaceId,key]) }
+[1;94m128 | [0m[1;91mmodel AudienceProfile { id String @id @default(uuid()); workspaceId String; name String?; targetAudience Json?; demographics Json?; painPoints Json?; interests Json?; goals Json?; problems Json?; source String?; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }[0m
+[1;94m129 | [0mmodel BrandVoice { id String @id @default(uuid()); workspaceId String; tone Json?; writingStyle Json?; dos Json?; donts Json?; source String?; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:129[0m
+[1;94m   | [0m
+[1;94m128 | [0mmodel AudienceProfile { id String @id @default(uuid()); workspaceId String; name String?; targetAudience Json?; demographics Json?; painPoints Json?; interests Json?; goals Json?; problems Json?; source String?; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m129 | [0m[1;91mmodel BrandVoice { id String @id @default(uuid()); workspaceId String; tone Json?; writingStyle Json?; dos Json?; donts Json?; source String?; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }[0m
+[1;94m130 | [0mmodel ContentDNA { id String @id @default(uuid()); workspaceId String; topics Json?; formats Json?; hooks Json?; visualStyle Json?; recurringPatterns Json?; winners Json?; underperformingPatterns Json?; gaps Json?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:130[0m
+[1;94m   | [0m
+[1;94m129 | [0mmodel BrandVoice { id String @id @default(uuid()); workspaceId String; tone Json?; writingStyle Json?; dos Json?; donts Json?; source String?; confidence Float?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m130 | [0m[1;91mmodel ContentDNA { id String @id @default(uuid()); workspaceId String; topics Json?; formats Json?; hooks Json?; visualStyle Json?; recurringPatterns Json?; winners Json?; underperformingPatterns Json?; gaps Json?; version Int @default(1); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }[0m
+[1;94m131 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:132[0m
+[1;94m   | [0m
+[1;94m131 | [0m
+[1;94m132 | [0m[1;91mmodel SocialAccount { id String @id @default(uuid()); workspaceId String; platform String; externalId String; username String?; profile Json?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); connection SocialConnection?; posts SocialPost[]; metrics SocialMetric[]; audiences SocialAudienceSnapshot[]; @@unique([workspaceId,platform,externalId]); @@index([workspaceId,platform]) }[0m
+[1;94m133 | [0mmodel SocialConnection { id String @id @default(uuid()); socialAccountId String @unique; status IntegrationStatus; accessTokenEncrypted String; refreshTokenEncrypted String?; expiresAt DateTime?; scopes String[]; lastSuccessfulSync DateTime?; lastFailedSync DateTime?; errorState String?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:133[0m
+[1;94m   | [0m
+[1;94m132 | [0mmodel SocialAccount { id String @id @default(uuid()); workspaceId String; platform String; externalId String; username String?; profile Json?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); connection SocialConnection?; posts SocialPost[]; metrics SocialMetric[]; audiences SocialAudienceSnapshot[]; @@unique([workspaceId,platform,externalId]); @@index([workspaceId,platform]) }
+[1;94m133 | [0m[1;91mmodel SocialConnection { id String @id @default(uuid()); socialAccountId String @unique; status IntegrationStatus; accessTokenEncrypted String; refreshTokenEncrypted String?; expiresAt DateTime?; scopes String[]; lastSuccessfulSync DateTime?; lastFailedSync DateTime?; errorState String?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade) }[0m
+[1;94m134 | [0mmodel SocialPost { id String @id @default(uuid()); workspaceId String; socialAccountId String; externalId String; contentId String?; publishedAt DateTime?; rawData Json?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); metrics SocialMetric[]; @@unique([socialAccountId,externalId]); @@index([workspaceId,publishedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:134[0m
+[1;94m   | [0m
+[1;94m133 | [0mmodel SocialConnection { id String @id @default(uuid()); socialAccountId String @unique; status IntegrationStatus; accessTokenEncrypted String; refreshTokenEncrypted String?; expiresAt DateTime?; scopes String[]; lastSuccessfulSync DateTime?; lastFailedSync DateTime?; errorState String?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade) }
+[1;94m134 | [0m[1;91mmodel SocialPost { id String @id @default(uuid()); workspaceId String; socialAccountId String; externalId String; contentId String?; publishedAt DateTime?; rawData Json?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); metrics SocialMetric[]; @@unique([socialAccountId,externalId]); @@index([workspaceId,publishedAt]) }[0m
+[1;94m135 | [0mmodel SocialMetric { id String @id @default(uuid()); workspaceId String; socialAccountId String; socialPostId String?; capturedAt DateTime; views Int?; reach Int?; likes Int?; comments Int?; shares Int?; saves Int?; followers Int?; engagementRate Float?; watchTimeSeconds Float?; clicks Int?; profileVisits Int?; rawData Json?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); socialPost SocialPost? @relation(fields:[socialPostId],references:[id]); @@index([workspaceId,capturedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:135[0m
+[1;94m   | [0m
+[1;94m134 | [0mmodel SocialPost { id String @id @default(uuid()); workspaceId String; socialAccountId String; externalId String; contentId String?; publishedAt DateTime?; rawData Json?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); metrics SocialMetric[]; @@unique([socialAccountId,externalId]); @@index([workspaceId,publishedAt]) }
+[1;94m135 | [0m[1;91mmodel SocialMetric { id String @id @default(uuid()); workspaceId String; socialAccountId String; socialPostId String?; capturedAt DateTime; views Int?; reach Int?; likes Int?; comments Int?; shares Int?; saves Int?; followers Int?; engagementRate Float?; watchTimeSeconds Float?; clicks Int?; profileVisits Int?; rawData Json?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); socialPost SocialPost? @relation(fields:[socialPostId],references:[id]); @@index([workspaceId,capturedAt]) }[0m
+[1;94m136 | [0mmodel SocialAudienceSnapshot { id String @id @default(uuid()); workspaceId String; socialAccountId String; capturedAt DateTime; data Json; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); @@index([workspaceId,capturedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:136[0m
+[1;94m   | [0m
+[1;94m135 | [0mmodel SocialMetric { id String @id @default(uuid()); workspaceId String; socialAccountId String; socialPostId String?; capturedAt DateTime; views Int?; reach Int?; likes Int?; comments Int?; shares Int?; saves Int?; followers Int?; engagementRate Float?; watchTimeSeconds Float?; clicks Int?; profileVisits Int?; rawData Json?; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); socialPost SocialPost? @relation(fields:[socialPostId],references:[id]); @@index([workspaceId,capturedAt]) }
+[1;94m136 | [0m[1;91mmodel SocialAudienceSnapshot { id String @id @default(uuid()); workspaceId String; socialAccountId String; capturedAt DateTime; data Json; socialAccount SocialAccount @relation(fields:[socialAccountId],references:[id],onDelete:Cascade); @@index([workspaceId,capturedAt]) }[0m
+[1;94m137 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:138[0m
+[1;94m   | [0m
+[1;94m137 | [0m
+[1;94m138 | [0m[1;91mmodel Website { id String @id @default(uuid()); workspaceId String; url String; domain String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); pages WebsitePage[]; scans WebsiteScan[]; analytics WebsiteAnalytics[]; @@unique([workspaceId,url]); @@index([workspaceId]) }[0m
+[1;94m139 | [0mmodel WebsitePage { id String @id @default(uuid()); workspaceId String; websiteId String; url String; title String?; contentText String?; extractedData Json?; lastScannedAt DateTime?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@unique([websiteId,url]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:139[0m
+[1;94m   | [0m
+[1;94m138 | [0mmodel Website { id String @id @default(uuid()); workspaceId String; url String; domain String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); pages WebsitePage[]; scans WebsiteScan[]; analytics WebsiteAnalytics[]; @@unique([workspaceId,url]); @@index([workspaceId]) }
+[1;94m139 | [0m[1;91mmodel WebsitePage { id String @id @default(uuid()); workspaceId String; websiteId String; url String; title String?; contentText String?; extractedData Json?; lastScannedAt DateTime?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@unique([websiteId,url]) }[0m
+[1;94m140 | [0mmodel WebsiteScan { id String @id @default(uuid()); workspaceId String; websiteId String; status String; startedAt DateTime; completedAt DateTime?; pagesScanned Int @default(0); errors Json?; sourceUrls Json?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@index([websiteId,startedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:140[0m
+[1;94m   | [0m
+[1;94m139 | [0mmodel WebsitePage { id String @id @default(uuid()); workspaceId String; websiteId String; url String; title String?; contentText String?; extractedData Json?; lastScannedAt DateTime?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@unique([websiteId,url]) }
+[1;94m140 | [0m[1;91mmodel WebsiteScan { id String @id @default(uuid()); workspaceId String; websiteId String; status String; startedAt DateTime; completedAt DateTime?; pagesScanned Int @default(0); errors Json?; sourceUrls Json?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@index([websiteId,startedAt]) }[0m
+[1;94m141 | [0mmodel WebsiteAnalytics { id String @id @default(uuid()); workspaceId String; websiteId String; capturedAt DateTime; visitors Int?; sessions Int?; trafficSources Json?; landingPages Json?; conversions Int?; leads Int?; signups Int?; purchases Int?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@index([workspaceId,capturedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:141[0m
+[1;94m   | [0m
+[1;94m140 | [0mmodel WebsiteScan { id String @id @default(uuid()); workspaceId String; websiteId String; status String; startedAt DateTime; completedAt DateTime?; pagesScanned Int @default(0); errors Json?; sourceUrls Json?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@index([websiteId,startedAt]) }
+[1;94m141 | [0m[1;91mmodel WebsiteAnalytics { id String @id @default(uuid()); workspaceId String; websiteId String; capturedAt DateTime; visitors Int?; sessions Int?; trafficSources Json?; landingPages Json?; conversions Int?; leads Int?; signups Int?; purchases Int?; website Website @relation(fields:[websiteId],references:[id],onDelete:Cascade); @@index([workspaceId,capturedAt]) }[0m
+[1;94m142 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:143[0m
+[1;94m   | [0m
+[1;94m142 | [0m
+[1;94m143 | [0m[1;91mmodel BusinessIntegration { id String @id @default(uuid()); workspaceId String; provider String; status IntegrationStatus; scopes String[]; credentialsEncrypted Json?; lastSyncAt DateTime?; errorState String?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); customers BusinessCustomer[]; leads BusinessLead[]; products BusinessProduct[]; orders BusinessOrder[]; conversions BusinessConversion[]; @@unique([workspaceId,provider]) }[0m
+[1;94m144 | [0mmodel BusinessCustomer { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:144[0m
+[1;94m   | [0m
+[1;94m143 | [0mmodel BusinessIntegration { id String @id @default(uuid()); workspaceId String; provider String; status IntegrationStatus; scopes String[]; credentialsEncrypted Json?; lastSyncAt DateTime?; errorState String?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); customers BusinessCustomer[]; leads BusinessLead[]; products BusinessProduct[]; orders BusinessOrder[]; conversions BusinessConversion[]; @@unique([workspaceId,provider]) }
+[1;94m144 | [0m[1;91mmodel BusinessCustomer { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }[0m
+[1;94m145 | [0mmodel BusinessLead { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:145[0m
+[1;94m   | [0m
+[1;94m144 | [0mmodel BusinessCustomer { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m145 | [0m[1;91mmodel BusinessLead { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }[0m
+[1;94m146 | [0mmodel BusinessProduct { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:146[0m
+[1;94m   | [0m
+[1;94m145 | [0mmodel BusinessLead { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m146 | [0m[1;91mmodel BusinessProduct { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }[0m
+[1;94m147 | [0mmodel BusinessOrder { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:147[0m
+[1;94m   | [0m
+[1;94m146 | [0mmodel BusinessProduct { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m147 | [0m[1;91mmodel BusinessOrder { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }[0m
+[1;94m148 | [0mmodel BusinessConversion { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:148[0m
+[1;94m   | [0m
+[1;94m147 | [0mmodel BusinessOrder { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }
+[1;94m148 | [0m[1;91mmodel BusinessConversion { id String @id @default(uuid()); workspaceId String; integrationId String; externalId String; data Json; integration BusinessIntegration @relation(fields:[integrationId],references:[id],onDelete:Cascade); @@unique([integrationId,externalId]) }[0m
+[1;94m149 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:150[0m
+[1;94m   | [0m
+[1;94m149 | [0m
+[1;94m150 | [0m[1;91mmodel Content { id String @id @default(uuid()); workspaceId String; authorId String?; title String?; description String?; format String; platform String; caption String?; script String?; status ContentStatus; campaignId String?; tags String[]; scheduledAt DateTime?; publishedAt DateTime?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); versions ContentVersion[]; publishAttempts PublishAttempt[]; assets ContentAsset[]; socialPosts SocialPost[]; author User? @relation("ContentAuthors",fields:[authorId],references:[id]); campaign Campaign? @relation(fields:[campaignId],references:[id]); calendarItems CalendarItem[]; collectionLinks ContentCollectionItem[]; @@index([workspaceId,status,scheduledAt]); @@index([workspaceId,updatedAt]) }[0m
+[1;94m151 | [0mmodel ContentVersion { id String @id @default(uuid()); contentId String; version Int; title String?; caption String?; script String?; metadata Json?; createdById String?; createdAt DateTime @default(now()); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@unique([contentId,version]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:151[0m
+[1;94m   | [0m
+[1;94m150 | [0mmodel Content { id String @id @default(uuid()); workspaceId String; authorId String?; title String?; description String?; format String; platform String; caption String?; script String?; status ContentStatus; campaignId String?; tags String[]; scheduledAt DateTime?; publishedAt DateTime?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); versions ContentVersion[]; publishAttempts PublishAttempt[]; assets ContentAsset[]; socialPosts SocialPost[]; author User? @relation("ContentAuthors",fields:[authorId],references:[id]); campaign Campaign? @relation(fields:[campaignId],references:[id]); calendarItems CalendarItem[]; collectionLinks ContentCollectionItem[]; @@index([workspaceId,status,scheduledAt]); @@index([workspaceId,updatedAt]) }
+[1;94m151 | [0m[1;91mmodel ContentVersion { id String @id @default(uuid()); contentId String; version Int; title String?; caption String?; script String?; metadata Json?; createdById String?; createdAt DateTime @default(now()); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@unique([contentId,version]) }[0m
+[1;94m152 | [0mmodel ContentAsset { id String @id @default(uuid()); workspaceId String; contentId String?; ownerId String?; fileName String; mimeType String; sizeBytes BigInt; storageKey String @unique; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); owner User? @relation("AssetOwners",fields:[ownerId],references:[id]); }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:152[0m
+[1;94m   | [0m
+[1;94m151 | [0mmodel ContentVersion { id String @id @default(uuid()); contentId String; version Int; title String?; caption String?; script String?; metadata Json?; createdById String?; createdAt DateTime @default(now()); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@unique([contentId,version]) }
+[1;94m152 | [0m[1;91mmodel ContentAsset { id String @id @default(uuid()); workspaceId String; contentId String?; ownerId String?; fileName String; mimeType String; sizeBytes BigInt; storageKey String @unique; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); owner User? @relation("AssetOwners",fields:[ownerId],references:[id]); }[0m
+[1;94m153 | [0mmodel ContentCollection { id String @id @default(uuid()); workspaceId String; name String; description String?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); items ContentCollectionItem[]; @@unique([workspaceId,name]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:153[0m
+[1;94m   | [0m
+[1;94m152 | [0mmodel ContentAsset { id String @id @default(uuid()); workspaceId String; contentId String?; ownerId String?; fileName String; mimeType String; sizeBytes BigInt; storageKey String @unique; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); owner User? @relation("AssetOwners",fields:[ownerId],references:[id]); }
+[1;94m153 | [0m[1;91mmodel ContentCollection { id String @id @default(uuid()); workspaceId String; name String; description String?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); items ContentCollectionItem[]; @@unique([workspaceId,name]) }[0m
+[1;94m154 | [0mmodel ContentCollectionItem { collectionId String; contentId String; position Int @default(0); collection ContentCollection @relation(fields:[collectionId],references:[id],onDelete:Cascade); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@id([collectionId,contentId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:154[0m
+[1;94m   | [0m
+[1;94m153 | [0mmodel ContentCollection { id String @id @default(uuid()); workspaceId String; name String; description String?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); items ContentCollectionItem[]; @@unique([workspaceId,name]) }
+[1;94m154 | [0m[1;91mmodel ContentCollectionItem { collectionId String; contentId String; position Int @default(0); collection ContentCollection @relation(fields:[collectionId],references:[id],onDelete:Cascade); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@id([collectionId,contentId]) }[0m
+[1;94m155 | [0mmodel CalendarItem { id String @id @default(uuid()); workspaceId String; contentId String?; campaignId String?; platform String?; scheduledFor DateTime; status String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); campaign Campaign? @relation(fields:[campaignId],references:[id]); @@index([workspaceId,scheduledFor,status]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:155[0m
+[1;94m   | [0m
+[1;94m154 | [0mmodel ContentCollectionItem { collectionId String; contentId String; position Int @default(0); collection ContentCollection @relation(fields:[collectionId],references:[id],onDelete:Cascade); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@id([collectionId,contentId]) }
+[1;94m155 | [0m[1;91mmodel CalendarItem { id String @id @default(uuid()); workspaceId String; contentId String?; campaignId String?; platform String?; scheduledFor DateTime; status String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); campaign Campaign? @relation(fields:[campaignId],references:[id]); @@index([workspaceId,scheduledFor,status]) }[0m
+[1;94m156 | [0mmodel Campaign { id String @id @default(uuid()); workspaceId String; name String; description String?; goal String?; startDate DateTime?; endDate DateTime?; audience Json?; platforms String[]; status CampaignStatus; metrics Json?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); contents Content[]; calendarItems CalendarItem[] }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:156[0m
+[1;94m   | [0m
+[1;94m155 | [0mmodel CalendarItem { id String @id @default(uuid()); workspaceId String; contentId String?; campaignId String?; platform String?; scheduledFor DateTime; status String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); content Content? @relation(fields:[contentId],references:[id]); campaign Campaign? @relation(fields:[campaignId],references:[id]); @@index([workspaceId,scheduledFor,status]) }
+[1;94m156 | [0m[1;91mmodel Campaign { id String @id @default(uuid()); workspaceId String; name String; description String?; goal String?; startDate DateTime?; endDate DateTime?; audience Json?; platforms String[]; status CampaignStatus; metrics Json?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); contents Content[]; calendarItems CalendarItem[] }[0m
+[1;94m157 | [0mmodel PublishAttempt { id String @id @default(uuid()); workspaceId String; contentId String; platform String; attempt Int; externalId String?; status PublishStatus; error String?; createdAt DateTime @default(now()); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@index([workspaceId,contentId,createdAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:157[0m
+[1;94m   | [0m
+[1;94m156 | [0mmodel Campaign { id String @id @default(uuid()); workspaceId String; name String; description String?; goal String?; startDate DateTime?; endDate DateTime?; audience Json?; platforms String[]; status CampaignStatus; metrics Json?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); contents Content[]; calendarItems CalendarItem[] }
+[1;94m157 | [0m[1;91mmodel PublishAttempt { id String @id @default(uuid()); workspaceId String; contentId String; platform String; attempt Int; externalId String?; status PublishStatus; error String?; createdAt DateTime @default(now()); content Content @relation(fields:[contentId],references:[id],onDelete:Cascade); @@index([workspaceId,contentId,createdAt]) }[0m
+[1;94m158 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:159[0m
+[1;94m   | [0m
+[1;94m158 | [0m
+[1;94m159 | [0m[1;91mmodel Trend { id String @id @default(uuid()); workspaceId String?; topic String; platform String?; momentum Float?; relevance Float?; audienceRelevance Float?; detectedAt DateTime @default(now()); expiresAt DateTime?; examples Json?; source String?; workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:Cascade); opportunities Opportunity[]; }[0m
+[1;94m160 | [0mmodel Opportunity { id String @id @default(uuid()); workspaceId String; trendId String?; title String; description String; whyItMatters String?; relevanceScore Float?; confidence Float?; suggestedPlatform String?; suggestedFormat String?; suggestedHook String?; suggestedCTA String?; source String?; createdAt DateTime @default(now()); expiresAt DateTime?; status OpportunityStatus; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); trend Trend? @relation(fields:[trendId],references:[id]); recommendations Recommendation[]; }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:160[0m
+[1;94m   | [0m
+[1;94m159 | [0mmodel Trend { id String @id @default(uuid()); workspaceId String?; topic String; platform String?; momentum Float?; relevance Float?; audienceRelevance Float?; detectedAt DateTime @default(now()); expiresAt DateTime?; examples Json?; source String?; workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:Cascade); opportunities Opportunity[]; }
+[1;94m160 | [0m[1;91mmodel Opportunity { id String @id @default(uuid()); workspaceId String; trendId String?; title String; description String; whyItMatters String?; relevanceScore Float?; confidence Float?; suggestedPlatform String?; suggestedFormat String?; suggestedHook String?; suggestedCTA String?; source String?; createdAt DateTime @default(now()); expiresAt DateTime?; status OpportunityStatus; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); trend Trend? @relation(fields:[trendId],references:[id]); recommendations Recommendation[]; }[0m
+[1;94m161 | [0mmodel Recommendation { id String @id @default(uuid()); workspaceId String; opportunityId String?; title String; reason String; priority Int; confidence Float?; suggestedAction String; relatedEntityType String?; relatedEntityId String?; createdAt DateTime @default(now()); expiresAt DateTime?; status RecommendationStatus; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); opportunity Opportunity? @relation(fields:[opportunityId],references:[id]); @@index([workspaceId,status,priority]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:161[0m
+[1;94m   | [0m
+[1;94m160 | [0mmodel Opportunity { id String @id @default(uuid()); workspaceId String; trendId String?; title String; description String; whyItMatters String?; relevanceScore Float?; confidence Float?; suggestedPlatform String?; suggestedFormat String?; suggestedHook String?; suggestedCTA String?; source String?; createdAt DateTime @default(now()); expiresAt DateTime?; status OpportunityStatus; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); trend Trend? @relation(fields:[trendId],references:[id]); recommendations Recommendation[]; }
+[1;94m161 | [0m[1;91mmodel Recommendation { id String @id @default(uuid()); workspaceId String; opportunityId String?; title String; reason String; priority Int; confidence Float?; suggestedAction String; relatedEntityType String?; relatedEntityId String?; createdAt DateTime @default(now()); expiresAt DateTime?; status RecommendationStatus; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); opportunity Opportunity? @relation(fields:[opportunityId],references:[id]); @@index([workspaceId,status,priority]) }[0m
+[1;94m162 | [0mmodel NextBestAction { id String @id @default(uuid()); workspaceId String; type NextBestActionType; title String; reason String; expectedValue Float?; confidence Float?; relatedEntityType String?; relatedEntityId String?; createdAt DateTime @default(now()); expiresAt DateTime?; status String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,status,createdAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:162[0m
+[1;94m   | [0m
+[1;94m161 | [0mmodel Recommendation { id String @id @default(uuid()); workspaceId String; opportunityId String?; title String; reason String; priority Int; confidence Float?; suggestedAction String; relatedEntityType String?; relatedEntityId String?; createdAt DateTime @default(now()); expiresAt DateTime?; status RecommendationStatus; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); opportunity Opportunity? @relation(fields:[opportunityId],references:[id]); @@index([workspaceId,status,priority]) }
+[1;94m162 | [0m[1;91mmodel NextBestAction { id String @id @default(uuid()); workspaceId String; type NextBestActionType; title String; reason String; expectedValue Float?; confidence Float?; relatedEntityType String?; relatedEntityId String?; createdAt DateTime @default(now()); expiresAt DateTime?; status String; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,status,createdAt]) }[0m
+[1;94m163 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:164[0m
+[1;94m   | [0m
+[1;94m163 | [0m
+[1;94m164 | [0m[1;91mmodel AIConversation { id String @id @default(uuid()); workspaceId String; userId String?; title String?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); messages AIMessage[]; actions AIAction[] }[0m
+[1;94m165 | [0mmodel AIMessage { id String @id @default(uuid()); conversationId String; role String; content String; metadata Json?; createdAt DateTime @default(now()); conversation AIConversation @relation(fields:[conversationId],references:[id],onDelete:Cascade); }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:165[0m
+[1;94m   | [0m
+[1;94m164 | [0mmodel AIConversation { id String @id @default(uuid()); workspaceId String; userId String?; title String?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); messages AIMessage[]; actions AIAction[] }
+[1;94m165 | [0m[1;91mmodel AIMessage { id String @id @default(uuid()); conversationId String; role String; content String; metadata Json?; createdAt DateTime @default(now()); conversation AIConversation @relation(fields:[conversationId],references:[id],onDelete:Cascade); }[0m
+[1;94m166 | [0mmodel AIAction { id String @id @default(uuid()); conversationId String; workspaceId String; userId String?; type String; input Json; output Json?; status String; requiresConfirmation Boolean @default(true); confirmedAt DateTime?; createdAt DateTime @default(now()); conversation AIConversation @relation(fields:[conversationId],references:[id],onDelete:Cascade); @@index([workspaceId,createdAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:166[0m
+[1;94m   | [0m
+[1;94m165 | [0mmodel AIMessage { id String @id @default(uuid()); conversationId String; role String; content String; metadata Json?; createdAt DateTime @default(now()); conversation AIConversation @relation(fields:[conversationId],references:[id],onDelete:Cascade); }
+[1;94m166 | [0m[1;91mmodel AIAction { id String @id @default(uuid()); conversationId String; workspaceId String; userId String?; type String; input Json; output Json?; status String; requiresConfirmation Boolean @default(true); confirmedAt DateTime?; createdAt DateTime @default(now()); conversation AIConversation @relation(fields:[conversationId],references:[id],onDelete:Cascade); @@index([workspaceId,createdAt]) }[0m
+[1;94m167 | [0mmodel AIUsage { id String @id @default(uuid()); workspaceId String; userId String?; operation String; provider String; model String; inputUnits Int; outputUnits Int; creditCost Int; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User? @relation(fields:[userId],references:[id]); @@index([workspaceId,createdAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:167[0m
+[1;94m   | [0m
+[1;94m166 | [0mmodel AIAction { id String @id @default(uuid()); conversationId String; workspaceId String; userId String?; type String; input Json; output Json?; status String; requiresConfirmation Boolean @default(true); confirmedAt DateTime?; createdAt DateTime @default(now()); conversation AIConversation @relation(fields:[conversationId],references:[id],onDelete:Cascade); @@index([workspaceId,createdAt]) }
+[1;94m167 | [0m[1;91mmodel AIUsage { id String @id @default(uuid()); workspaceId String; userId String?; operation String; provider String; model String; inputUnits Int; outputUnits Int; creditCost Int; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User? @relation(fields:[userId],references:[id]); @@index([workspaceId,createdAt]) }[0m
+[1;94m168 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:169[0m
+[1;94m   | [0m
+[1;94m168 | [0m
+[1;94m169 | [0m[1;91mmodel Notification { id String @id @default(uuid()); workspaceId String; userId String?; type String; title String; body String; data Json?; readAt DateTime?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User? @relation(fields:[userId],references:[id]); @@index([userId,readAt,createdAt]) }[0m
+[1;94m170 | [0mmodel NotificationPreference { id String @id @default(uuid()); workspaceId String; userId String; channel String; eventType String; enabled Boolean @default(true); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation(fields:[userId],references:[id]); @@unique([workspaceId,userId,channel,eventType]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:170[0m
+[1;94m   | [0m
+[1;94m169 | [0mmodel Notification { id String @id @default(uuid()); workspaceId String; userId String?; type String; title String; body String; data Json?; readAt DateTime?; createdAt DateTime @default(now()); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User? @relation(fields:[userId],references:[id]); @@index([userId,readAt,createdAt]) }
+[1;94m170 | [0m[1;91mmodel NotificationPreference { id String @id @default(uuid()); workspaceId String; userId String; channel String; eventType String; enabled Boolean @default(true); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation(fields:[userId],references:[id]); @@unique([workspaceId,userId,channel,eventType]) }[0m
+[1;94m171 | [0mmodel DeviceRegistration { id String @id @default(uuid()); workspaceId String; userId String; platform String; tokenHash String @unique; tokenEncrypted String; status String @default("ACTIVE"); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; lastSeenAt DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([workspaceId,userId,status]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:171[0m
+[1;94m   | [0m
+[1;94m170 | [0mmodel NotificationPreference { id String @id @default(uuid()); workspaceId String; userId String; channel String; eventType String; enabled Boolean @default(true); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation(fields:[userId],references:[id]); @@unique([workspaceId,userId,channel,eventType]) }
+[1;94m171 | [0m[1;91mmodel DeviceRegistration { id String @id @default(uuid()); workspaceId String; userId String; platform String; tokenHash String @unique; tokenEncrypted String; status String @default("ACTIVE"); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; lastSeenAt DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([workspaceId,userId,status]) }[0m
+[1;94m172 | [0mmodel Release { id String @id @default(uuid()); version String @unique; buildNumber Int?; title String; changelog Json; minimumSupportedVersion String?; platforms Json; status String @default("DRAFT"); publishedAt DateTime?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; @@index([status,publishedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:172[0m
+[1;94m   | [0m
+[1;94m171 | [0mmodel DeviceRegistration { id String @id @default(uuid()); workspaceId String; userId String; platform String; tokenHash String @unique; tokenEncrypted String; status String @default("ACTIVE"); createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; lastSeenAt DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); user User @relation(fields:[userId],references:[id],onDelete:Cascade); @@index([workspaceId,userId,status]) }
+[1;94m172 | [0m[1;91mmodel Release { id String @id @default(uuid()); version String @unique; buildNumber Int?; title String; changelog Json; minimumSupportedVersion String?; platforms Json; status String @default("DRAFT"); publishedAt DateTime?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; @@index([status,publishedAt]) }[0m
+[1;94m173 | [0mmodel APIKey { id String @id @default(uuid()); workspaceId String; name String; keyHash String @unique; prefix String; permissions String[]; createdAt DateTime @default(now()); lastUsedAt DateTime?; revokedAt DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,revokedAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:173[0m
+[1;94m   | [0m
+[1;94m172 | [0mmodel Release { id String @id @default(uuid()); version String @unique; buildNumber Int?; title String; changelog Json; minimumSupportedVersion String?; platforms Json; status String @default("DRAFT"); publishedAt DateTime?; createdAt DateTime @default(now()); updatedAt DateTime @updatedAt; @@index([status,publishedAt]) }
+[1;94m173 | [0m[1;91mmodel APIKey { id String @id @default(uuid()); workspaceId String; name String; keyHash String @unique; prefix String; permissions String[]; createdAt DateTime @default(now()); lastUsedAt DateTime?; revokedAt DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,revokedAt]) }[0m
+[1;94m174 | [0mmodel Webhook { id String @id @default(uuid()); workspaceId String; endpointUrl String; secretEncrypted String; eventTypes String[]; active Boolean @default(true); lastDeliveryAt DateTime?; failureCount Int @default(0); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:174[0m
+[1;94m   | [0m
+[1;94m173 | [0mmodel APIKey { id String @id @default(uuid()); workspaceId String; name String; keyHash String @unique; prefix String; permissions String[]; createdAt DateTime @default(now()); lastUsedAt DateTime?; revokedAt DateTime?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@index([workspaceId,revokedAt]) }
+[1;94m174 | [0m[1;91mmodel Webhook { id String @id @default(uuid()); workspaceId String; endpointUrl String; secretEncrypted String; eventTypes String[]; active Boolean @default(true); lastDeliveryAt DateTime?; failureCount Int @default(0); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }[0m
+[1;94m175 | [0mmodel IntegrationEvent { id String @id @default(uuid()); workspaceId String; provider String; eventType String; externalId String?; payload Json; receivedAt DateTime @default(now()); processedAt DateTime?; error String?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@unique([provider,eventType,externalId]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:175[0m
+[1;94m   | [0m
+[1;94m174 | [0mmodel Webhook { id String @id @default(uuid()); workspaceId String; endpointUrl String; secretEncrypted String; eventTypes String[]; active Boolean @default(true); lastDeliveryAt DateTime?; failureCount Int @default(0); workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade) }
+[1;94m175 | [0m[1;91mmodel IntegrationEvent { id String @id @default(uuid()); workspaceId String; provider String; eventType String; externalId String?; payload Json; receivedAt DateTime @default(now()); processedAt DateTime?; error String?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@unique([provider,eventType,externalId]) }[0m
+[1;94m176 | [0mmodel AuditLog { id String @id @default(uuid()); workspaceId String?; userId String?; action String; entityType String?; entityId String?; metadata Json?; ipAddress String?; userAgent String?; createdAt DateTime @default(now()); workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:SetNull); user User? @relation(fields:[userId],references:[id]); @@index([workspaceId,createdAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:176[0m
+[1;94m   | [0m
+[1;94m175 | [0mmodel IntegrationEvent { id String @id @default(uuid()); workspaceId String; provider String; eventType String; externalId String?; payload Json; receivedAt DateTime @default(now()); processedAt DateTime?; error String?; workspace Workspace @relation(fields:[workspaceId],references:[id],onDelete:Cascade); @@unique([provider,eventType,externalId]) }
+[1;94m176 | [0m[1;91mmodel AuditLog { id String @id @default(uuid()); workspaceId String?; userId String?; action String; entityType String?; entityId String?; metadata Json?; ipAddress String?; userAgent String?; createdAt DateTime @default(now()); workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:SetNull); user User? @relation(fields:[userId],references:[id]); @@index([workspaceId,createdAt]) }[0m
+[1;94m177 | [0mmodel Job { id String @id @default(uuid()); workspaceId String?; type String; status JobStatus; payload Json; attempts Int @default(0); maxAttempts Int @default(5); idempotencyKey String @unique; availableAt DateTime @default(now()); startedAt DateTime?; completedAt DateTime?; failedAt DateTime?; error String?; createdAt DateTime @default(now()); workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:SetNull); @@index([status,availableAt]) }
+[1;94m   | [0m
+[1;91merror[0m: [1mError validating: This line is invalid. It does not start with any known Prisma schema keyword.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:177[0m
+[1;94m   | [0m
+[1;94m176 | [0mmodel AuditLog { id String @id @default(uuid()); workspaceId String?; userId String?; action String; entityType String?; entityId String?; metadata Json?; ipAddress String?; userAgent String?; createdAt DateTime @default(now()); workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:SetNull); user User? @relation(fields:[userId],references:[id]); @@index([workspaceId,createdAt]) }
+[1;94m177 | [0m[1;91mmodel Job { id String @id @default(uuid()); workspaceId String?; type String; status JobStatus; payload Json; attempts Int @default(0); maxAttempts Int @default(5); idempotencyKey String @unique; availableAt DateTime @default(now()); startedAt DateTime?; completedAt DateTime?; failedAt DateTime?; error String?; createdAt DateTime @default(now()); workspace Workspace? @relation(fields:[workspaceId],references:[id],onDelete:SetNull); @@index([status,availableAt]) }[0m
+[1;94m178 | [0m
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Session" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:100[0m
+[1;94m   | [0m
+[1;94m99 | [0m notificationSettings Json?
+[1;94m100 | [0m sessions [1;91mSession[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Account" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:101[0m
+[1;94m   | [0m
+[1;94m100 | [0m sessions Session[]
+[1;94m101 | [0m accounts [1;91mAccount[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "VerificationToken" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:102[0m
+[1;94m   | [0m
+[1;94m101 | [0m accounts Account[]
+[1;94m102 | [0m verificationTokens [1;91mVerificationToken[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "PasswordResetToken" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:103[0m
+[1;94m   | [0m
+[1;94m102 | [0m verificationTokens VerificationToken[]
+[1;94m103 | [0m passwordResetTokens [1;91mPasswordResetToken[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AIUsage" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:104[0m
+[1;94m   | [0m
+[1;94m103 | [0m passwordResetTokens PasswordResetToken[]
+[1;94m104 | [0m aiUsages [1;91mAIUsage[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Notification" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:105[0m
+[1;94m   | [0m
+[1;94m104 | [0m aiUsages AIUsage[]
+[1;94m105 | [0m notifications [1;91mNotification[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "DeviceRegistration" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:106[0m
+[1;94m   | [0m
+[1;94m105 | [0m notifications Notification[]
+[1;94m106 | [0m deviceRegistrations [1;91mDeviceRegistration[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "AuditLog" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:107[0m
+[1;94m   | [0m
+[1;94m106 | [0m deviceRegistrations DeviceRegistration[]
+[1;94m107 | [0m auditLogs [1;91mAuditLog[0m[]
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Workspace" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:108[0m
+[1;94m   | [0m
+[1;94m107 | [0m auditLogs AuditLog[]
+[1;94m108 | [0m ownedWorkspaces [1;91mWorkspace[0m[] @relation("WorkspaceOwner")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "WorkspaceMember" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:109[0m
+[1;94m   | [0m
+[1;94m108 | [0m ownedWorkspaces Workspace[] @relation("WorkspaceOwner")
+[1;94m109 | [0m workspaceMemberships [1;91mWorkspaceMember[0m[] @relation("WorkspaceMemberships")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "Content" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:110[0m
+[1;94m   | [0m
+[1;94m109 | [0m workspaceMemberships WorkspaceMember[] @relation("WorkspaceMemberships")
+[1;94m110 | [0m authoredContent [1;91mContent[0m[] @relation("ContentAuthors")
+[1;94m   | [0m
+[1;91merror[0m: [1mType "ContentAsset" is neither a built-in type, nor refers to another model, composite type, or enum.[0m
+  [1;94m-->[0m  [4mC:\Users\opeye\Downloads\Contentra\prisma\schema.prisma:111[0m
+[1;94m   | [0m
+[1;94m110 | [0m authoredContent Content[] @relation("ContentAuthors")
+[1;94m111 | [0m ownedAssets [1;91mContentAsset[0m[] @relation("AssetOwners")
+[1;94m   | [0m
+
+Validation Error Count: 69
+[Context: validate]
+
+Prisma CLI Version : 6.19.3
+undefined
+C:\Users\opeye\Downloads\Contentra\apps\api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "prisma" not found

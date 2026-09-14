@@ -1,0 +1,2 @@
+import {BusinessShell} from '@/components/business-shell';import {EmptyState,PageHeader} from '@/components/ui';
+export default function Page(){return <BusinessShell><PageHeader eyebrow="Business OS" title="api data" description="Business intelligence is backed by workspace data and configured integrations."/><EmptyState title="No connected business data" description="Connect a supported business integration to populate this view. Contentra will not fabricate customers, revenue, conversions, or attribution."/></BusinessShell>}
