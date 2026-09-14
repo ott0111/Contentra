@@ -114,7 +114,7 @@ export default function CalendarPage() {
             <button className="text-btn" onClick={() => openDay(day)}>+ Add</button>
           </div>)}
         </div>
-        <div className="cal-legend"><span><i style={{ background: 'var(--accent2)' }} />Scheduled</span><span><i style={{ background: '#eef4ff' }} />... pending</span><span>Click an item to open, reschedule, or cancel it.</span></div></Card>
+        <div className="cal-legend"><span><i style={{ background: 'var(--accent2)' }} />Scheduled</span><span><i style={{ background: 'var(--success-bg)' }} />Published</span><span><i style={{ background: 'var(--danger-bg)' }} />Failed</span><span className="muted">Click an item to open, reschedule, or cancel it.</span></div></Card>
       </>}
     <div className="section"><Card><h3>Upcoming</h3>{(items ?? []).filter(x => new Date(x.scheduledFor) >= new Date()).slice(0, 5).length ? (items ?? []).filter(x => new Date(x.scheduledFor) >= new Date()).slice(0, 5).map(x => <p key={x.id}><Badge>{x.status}</Badge> {x.content?.title ?? 'Untitled'} · {new Date(x.scheduledFor).toLocaleString()}</p>) : <p className="muted">No upcoming scheduled items this month.</p>}</Card></div>
     {selected && <div className="modal-backdrop" onClick={() => setSelected(null)}><div className="modal-card card" onClick={e => e.stopPropagation()} role="dialog" aria-label="Calendar item">

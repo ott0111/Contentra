@@ -91,6 +91,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@contentra/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tauri-apps/api':
         specifier: ^2.0.0
         version: 2.11.1
@@ -125,6 +128,9 @@ importers:
       '@contentra/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@contentra/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       expo:
         specifier: ~53.0.0
         version: 53.0.27(@babel/core@7.29.7)(@expo/metro-runtime@5.0.4(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.3.0)(react@19.0.0)))(react-native@0.79.0(@babel/core@7.29.7)(@types/react@19.3.0)(react@19.0.0))(react@19.0.0)
@@ -171,6 +177,9 @@ importers:
       '@contentra/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@contentra/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@19.1.0)
@@ -218,6 +227,8 @@ importers:
   packages/integrations: {}
 
   packages/types: {}
+
+  packages/ui: {}
 
   packages/validation:
     dependencies:

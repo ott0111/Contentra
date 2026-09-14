@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { Bell, ChevronDown, Settings, LogOut, Search, X } from 'lucide-react';
-import { SearchButton, Skeleton, AIWidget, Badge } from './ui';
+import { Bell, ChevronDown, Settings, LogOut, Search, X, Command, FileText } from 'lucide-react';
+import { SearchButton, Skeleton, AIWidget, Badge, Toaster, toast } from './ui';
 import { ReleaseNotice } from './release-notice';
 import { api, ApiClientError } from '@/lib/api';
 import { useCallback, useEffect, useState } from 'react';
@@ -57,12 +57,14 @@ export function AppShell({children,active}:{children:React.ReactNode;active:stri
   if(!workspaceId)return;
   setNotifs(current=>current?.map(n=>n.id===id?{...n,readAt:new Date().toISOString()}:n)??current);
   await api(`/api/v1/workspaces/${workspaceId}/notifications/${id}/read`,{method:'POST'},workspaceId).catch(()=>undefined);
+  toast('Notification marked as read','info');
  }
  async function markAllRead(){
   const id=workspaceId; if(!id||!notifs)return;
   const ids=notifs.filter(n=>!n.readAt).map(n=>n.id);
   await Promise.all(ids.map(nid=>api(`/api/v1/workspaces/${id}/notifications/${nid}/read`,{method:'POST'},id).catch(()=>undefined)));
   setNotifs(current=>current?.map(n=>({...n,readAt:n.readAt??new Date().toISOString()}))??current);
+  toast('All notifications marked as read','success');
  }
 
  function openSearch(){
@@ -91,11 +93,11 @@ export function AppShell({children,active}:{children:React.ReactNode;active:stri
  return <div className="app-shell">
   <ReleaseNotice/>
   <header className="topbar">
-   <div className="top-left"><Link href="/app" className="brand"><span className="brand-mark">C</span>Contentra</Link>
+   <div className="top-left"><Link href="/app" className="brand"><span className="brand-mark" aria-hidden="true" />Contentra</Link>
     <div className="workspace-wrap">
      <button className="workspace" onClick={()=>setMenu(!menu)} aria-expanded={menu}>{workspace?.name??'Workspace'} <ChevronDown size={13}/></button>
      {menu&&<div className="workspace-menu">
-      {me?.workspaces.map(x=><button key={x.workspace.id} onClick={()=>{setWorkspaceId(x.workspace.id);localStorage.setItem('contentra_workspace',x.workspace.id);setMenu(false)}}>{x.workspace.name}<small>{x.role}</small></button>)}
+      {me?.workspaces.map(x=><button key={x.workspace.id} onClick={()=>{setWorkspaceId(x.workspace.id);localStorage.setItem('contentra_workspace',x.workspace.id);setMenu(false);toast(`Switched to ${x.workspace.name}`,'success')}}>{x.workspace.name}<small>{x.role}</small></button>)}
       {(workspace?.type==='BUSINESS'||workspace?.type==='AGENCY')&&<Link href="/app/business/overview">Business OS</Link>}
       <Link href="/app/settings/workspaces">Manage workspaces</Link>
      </div>}
@@ -117,7 +119,7 @@ export function AppShell({children,active}:{children:React.ReactNode;active:stri
     :<div className="empty"><h3>No workspace selected</h3><p>Create or select a workspace to continue.</p><Link className="btn btn-secondary" href="/app/settings/workspaces">Manage workspaces</Link></div>}
   </main>
   {bellOpen&&<div className="modal-backdrop" onClick={()=>setBellOpen(false)}><div className="drawer card" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Notifications">
-   <div className="drawer-head"><h3>Notifications</h3><button className="icon-btn" onClick={()=>setBellOpen(false)} aria-label="Close notifications"><X size={16}/></button></div>
+   <div className="drawer-head"><div className="drawer-title"><h3>Notifications</h3>{unread>0&&<span className="drawer-badge">{unread}</span>}</div><button className="icon-btn" onClick={()=>setBellOpen(false)} aria-label="Close notifications"><X size={16}/></button></div>
    {notifError&&<p role="alert" style={{color:'var(--danger)'}}>{notifError}</p>}
    {!notifs?<p className="muted">Loading…</p>:notifs.length===0?<p className="muted">You're all caught up.</p>:<>
     <div className="card-actions"><button className="text-btn" onClick={()=>void markAllRead()}>Mark all read</button></div>
@@ -130,13 +132,16 @@ export function AppShell({children,active}:{children:React.ReactNode;active:stri
    </>}
   </div></div>}
   {searchOpen&&<div className="modal-backdrop" onClick={()=>setSearchOpen(false)}><div className="search-modal card" onClick={e=>e.stopPropagation()} role="dialog" aria-label="Search content">
-   <div className="search-input-row"><Search size={16}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search your content by title, platform, or format…" aria-label="Search your content"/><button className="icon-btn" onClick={()=>setSearchOpen(false)} aria-label="Close search"><X size={16}/></button></div>
+   <div className="search-head"><div className="search-title"><Search size={15}/><h2>Search</h2></div><kbd className="search-kbd"><Command size={12}/> K</kbd></div>
+   <div className="search-input-row"><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search your content by title, platform, or format…" aria-label="Search your content"/><button className="icon-btn" onClick={()=>setSearchOpen(false)} aria-label="Close search"><X size={16}/></button></div>
    <div className="search-results">
-    {searchLoading?<p className="muted">Loading content…</p>
-     :results.length===0?<p className="muted">{term?`No content matches "${query}".`:'Nothing created yet. Start from Create.'}</p>
-     :results.map(x=><Link key={x.id} href={`/app/content/${x.id}`} onClick={()=>setSearchOpen(false)} className="search-result"><span><strong>{x.title??'Untitled content'}</strong><small>{x.platform} · {x.format}</small></span><Badge>{x.status}</Badge></Link>)}
+    {searchLoading?<p className="muted" style={{padding:12}}>Loading content…</p>
+     :results.length===0?<p className="muted" style={{padding:12}}>{term?`No content matches "${query}".`:'Nothing created yet. Start from Create.'}</p>
+     :<div><span className="search-group-label">Content</span>{results.map(x=><Link key={x.id} href={`/app/content/${x.id}`} onClick={()=>setSearchOpen(false)} className="search-result"><span className="search-result-lead"><FileText size={15}/></span><span><strong>{x.title??'Untitled content'}</strong><small>{x.platform} · {x.format}</small></span><Badge>{x.status}</Badge></Link>)}</div>}
    </div>
+   <div className="search-footer"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
   </div></div>}
   <AIWidget/>
+  <Toaster/>
  </div>;
 }
