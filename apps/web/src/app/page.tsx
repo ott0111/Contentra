@@ -1,11 +1,16 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 
-export default async function Root(){
-  const cookieHeader = (await cookies()).toString();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-  try {
-    const response = await fetch(`${apiUrl}/api/v1/auth/me`, { headers: { cookie: cookieHeader }, cache: 'no-store' });
-    redirect(response.ok ? '/app' : '/login');
-  } catch { redirect('/login'); }
+export default function Root() {
+  const router = useRouter();
+  useEffect(() => {
+    let mounted = true;
+    api('/api/v1/auth/me')
+      .then(() => { if (mounted) router.replace('/app'); })
+      .catch(() => { if (mounted) router.replace('/login'); });
+    return () => { mounted = false; };
+  }, [router]);
+  return null;
 }

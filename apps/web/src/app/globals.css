@@ -14,8 +14,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .app-shell{min-height:100vh}
 .topbar{height:72px;display:grid;grid-template-columns:220px 1fr 220px;align-items:center;padding:0 28px;border-bottom:1px solid var(--border);background:rgba(250,250,250,.92);position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
 .brand{display:inline-flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em;text-decoration:none;color:var(--text)}
-.brand-mark{width:28px;height:28px;border-radius:9px;background:var(--text);background-image:url('/contentra-icon.svg');background-size:58% 58%;background-repeat:no-repeat;background-position:center;display:inline-block;flex-shrink:0}
-.brand:hover .brand-mark{background-color:#2a2a2a}
+.brand-mark{width:28px;height:28px;border-radius:9px;background:linear-gradient(140deg,#ff8a1e 0%,#ff6a00 55%,#e85f00 100%);position:relative;display:inline-block;flex-shrink:0}
+.brand-mark::after{content:'';position:absolute;inset:0;background-image:url('/contentra-icon.svg');background-size:58% 58%;background-repeat:no-repeat;background-position:center}
+.brand:hover .brand-mark{background:linear-gradient(140deg,#ff9a3d 0%,#ff7a14 55%,#f05f00 100%)}
 .top-left{display:flex;align-items:center;gap:14px;min-width:0}
 .workspace{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:12px;background:#fff;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
 .workspace:focus-visible{outline:none;box-shadow:0 0 0 3px var(--focus-ring)}

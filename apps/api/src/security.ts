@@ -56,11 +56,20 @@ export function parseCookies(header?: string) {
 }
 
 export function sessionCookie(token: string, maxAgeSeconds: number) {
-  return `contentra_session=${encodeURIComponent(token)}; Max-Age=${maxAgeSeconds}; Path=/; HttpOnly; Secure; SameSite=Lax`;
+  return `contentra_session=${encodeURIComponent(token)}; Max-Age=${maxAgeSeconds}; Path=/; HttpOnly; ${cookiePolicy()}`;
 }
 
 export function clearSessionCookie() {
-  return 'contentra_session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax';
+  return `contentra_session=; Max-Age=0; Path=/; HttpOnly; ${cookiePolicy()}`;
+}
+
+function cookiePolicy() {
+  // Production is cross-site: the web app (Vercel) and the API (Render) live on
+  // different registrable domains, so the session cookie must be SameSite=None.
+  // Browsers require Secure alongside None, and Render serves HTTPS. Local
+  // development runs both apps on localhost (same-site) over HTTP, where None
+  // would be rejected, so Lax is kept there.
+  return process.env.NODE_ENV === "production" ? "SameSite=None; Secure" : "SameSite=Lax";
 }
 
 export function verifyWebhookSignature(payload: string, signatureHeader: string, secret: string, toleranceSeconds = 300) {
