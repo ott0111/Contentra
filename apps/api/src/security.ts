@@ -69,7 +69,14 @@ function cookiePolicy() {
   // Browsers require Secure alongside None, and Render serves HTTPS. Local
   // development runs both apps on localhost (same-site) over HTTP, where None
   // would be rejected, so Lax is kept there.
-  return process.env.NODE_ENV === "production" ? "SameSite=None; Secure" : "SameSite=Lax";
+  //
+  // Partitioned (CHIPS) additionally scopes the cookie to the (Vercel, Render)
+  // partition. Partitioned cookies are exempt from third-party cookie blocking
+  // (Safari ITP, Firefox ETP, Chrome private windows, privacy extensions), so
+  // sessions keep working exactly where a plain None cookie is silently
+  // discarded. Browsers without CHIPS support ignore the attribute and keep
+  // the prior behavior. HttpOnly and Secure are unchanged.
+  return process.env.NODE_ENV === "production" ? "SameSite=None; Secure; Partitioned" : "SameSite=Lax";
 }
 
 export function verifyWebhookSignature(payload: string, signatureHeader: string, secret: string, toleranceSeconds = 300) {
