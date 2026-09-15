@@ -224,7 +224,11 @@ importers:
         specifier: workspace:*
         version: link:../types
 
-  packages/integrations: {}
+  packages/integrations:
+    dependencies:
+      '@contentra/types':
+        specifier: workspace:*
+        version: link:../types
 
   packages/types: {}
 
