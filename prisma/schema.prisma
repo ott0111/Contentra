@@ -21,6 +21,17 @@ enum WorkspaceRole {
   VIEWER
 }
 
+enum StaffRole {
+  MANAGEMENT
+  OPERATIONS
+  DIRECTOR
+  VICE_PRESIDENT
+  EXECUTIVE_VICE_PRESIDENT
+  CHIEF
+  BOD
+  OWNER
+}
+
 enum ContentStatus {
   IDEA
   DRAFT
@@ -111,6 +122,7 @@ model User {
   ownedAssets             ContentAsset[]           @relation("AssetOwners")
   notificationPreferences NotificationPreference[]
   privacySetting          PrivacySetting?
+  referralClaims          Referral[]
 }
 
 model Session {
@@ -177,6 +189,7 @@ model Workspace {
   owner                   User                     @relation("WorkspaceOwner", fields: [ownerId], references: [id])
   members                 WorkspaceMember[]
   subscription            Subscription?
+  entitlementOverride     EntitlementOverride?
   brandProfile            BrandProfile?
   brandIntelligence       BrandIntelligence[]
   audienceProfiles        AudienceProfile[]
@@ -211,6 +224,9 @@ model Workspace {
   analyticsMetrics        AnalyticsMetric[]
   libraryItems            LibraryItem[]
   privacySettings         PrivacySetting[]
+  entitlementAdjustments  EntitlementAdjustment[]
+  referralCode            ReferralCode?
+  referredReferrals       Referral[]               @relation("ReferredWorkspace")
 
   @@index([ownerId])
 }
@@ -240,6 +256,133 @@ model WorkspaceMember {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Granular entitlements & referrals.
+//
+// A referenced user gets one Referral. Admin tier overrides stay in
+// EntitlementOverride (a wholesale plan swap) — these models are the *granular*
+// layer that coexists: ReferralCode/Referral capture the referral loop and
+// EntitlementAdjustment captures admin-granted/withdrawn access or allowance
+// without touching the plan. FunnelEvent records anonymous pre-auth marketing
+// signals on the public landing page.
+// ---------------------------------------------------------------------------
+
+enum ReferralStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+}
+
+enum AdjustmentKind {
+  // Adds to a numeric allowance (e.g. +50 AI generations).
+  ALLOWANCE
+  // Grants boolean feature access (e.g. advanced_analytics).
+  ACCESS
+}
+
+model ReferralCode {
+  id          String     @id @default(uuid())
+  code        String     @unique
+  workspaceId String     @unique
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  referrals   Referral[]
+  createdAt   DateTime   @default(now())
+}
+
+model Referral {
+  id                  String         @id @default(uuid())
+  codeId              String
+  referredUserId      String
+  referredWorkspaceId String?
+  status              ReferralStatus @default(PENDING)
+  rewardAiGenerations Int            @default(10)
+  rewardDeliveredAt   DateTime?
+  completedAt         DateTime?
+  createdAt           DateTime       @default(now())
+  code                ReferralCode   @relation(fields: [codeId], references: [id], onDelete: Cascade)
+  referredUser        User           @relation(fields: [referredUserId], references: [id], onDelete: Cascade)
+  referredWorkspace   Workspace?     @relation("ReferredWorkspace", fields: [referredWorkspaceId], references: [id], onDelete: SetNull)
+
+  @@unique([codeId, referredUserId])
+  @@index([referredUserId, status])
+  @@index([referredWorkspaceId])
+}
+
+model EntitlementAdjustment {
+  id          String         @id @default(uuid())
+  workspaceId String
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  kind        AdjustmentKind
+  feature     String
+  amount      Int?
+  active      Boolean        @default(true)
+  expiresAt   DateTime?
+  reason      String?
+  grantedBy   String? // StaffMember id when staff-granted; "referral:<code>" when referral-driven
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  staff       StaffMember?   @relation(fields: [grantedBy], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, feature, active])
+  @@index([workspaceId, active])
+}
+
+model FunnelEvent {
+  id        String   @id @default(uuid())
+  event     String
+  clientId  String?
+  ref       String?
+  url       String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([event, createdAt])
+}
+
+// Internal staff (separate from workspace RBAC). Staff are provisioned
+// server-side by email; the client never hardcodes staff identities.
+model StaffMember {
+  id                     String                  @id @default(uuid())
+  email                  String                  @unique
+  displayName            String?
+  role                   StaffRole
+  isRoot                 Boolean                 @default(false)
+  active                 Boolean                 @default(true)
+  invitedAt              DateTime                @default(now())
+  lastLoginAt            DateTime?
+  createdAt              DateTime                @default(now())
+  sessions               AdminSession[]
+  codes                  AdminCode[]
+  auditLogs              AuditLog[]
+  entitlementOverrides   EntitlementOverride[]
+  entitlementAdjustments EntitlementAdjustment[]
+}
+
+model AdminCode {
+  id        String      @id @default(uuid())
+  staffId   String
+  codeHash  String
+  purpose   String      @default("login")
+  attempts  Int         @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime    @default(now())
+  staff     StaffMember @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([staffId, createdAt])
+}
+
+model AdminSession {
+  id        String      @id @default(uuid())
+  staffId   String
+  tokenHash String      @unique
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+  staff     StaffMember @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@index([staffId])
 }
 
 model Plan {
@@ -272,6 +415,24 @@ model Subscription {
   currentPeriodEnd       DateTime?
   workspace              Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   plan                   Plan      @relation(fields: [planId], references: [id])
+
+  @@unique([provider, externalSubscriptionId])
+}
+
+model EntitlementOverride {
+  id          String       @id @default(uuid())
+  workspaceId String       @unique
+  plan        String
+  grantedBy   String?
+  staff       StaffMember? @relation(fields: [grantedBy], references: [id], onDelete: SetNull)
+  reason      String?
+  expiresAt   DateTime?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([active])
 }
 
 model AICreditBalance {
@@ -1035,33 +1196,35 @@ model Webhook {
 }
 
 model IntegrationEvent {
-  id          String    @id @default(uuid())
-  workspaceId String
+  id          String     @id @default(uuid())
+  workspaceId String?
   provider    String
   eventType   String
   externalId  String?
   payload     Json
-  receivedAt  DateTime  @default(now())
+  receivedAt  DateTime   @default(now())
   processedAt DateTime?
   error       String?
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@unique([provider, eventType, externalId])
 }
 
 model AuditLog {
-  id          String     @id @default(uuid())
+  id          String       @id @default(uuid())
   workspaceId String?
   userId      String?
+  staffId     String?
   action      String
   entityType  String?
   entityId    String?
   metadata    Json?
   ipAddress   String?
   userAgent   String?
-  createdAt   DateTime   @default(now())
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  user        User?      @relation(fields: [userId], references: [id])
+  createdAt   DateTime     @default(now())
+  workspace   Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  user        User?        @relation(fields: [userId], references: [id])
+  staff       StaffMember? @relation(fields: [staffId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId, createdAt])
 }
@@ -1087,28 +1250,28 @@ model Job {
 }
 
 model PrivacySetting {
-  id               String    @id @default(uuid())
-  userId           String    @unique
+  id               String     @id @default(uuid())
+  userId           String     @unique
   workspaceId      String?
-  analyticsOptIn   Boolean   @default(true)
-  marketingOptIn   Boolean   @default(false)
-  dataSharingOptIn Boolean   @default(false)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyticsOptIn   Boolean    @default(true)
+  marketingOptIn   Boolean    @default(false)
+  dataSharingOptIn Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace        Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
 }
 
 model ImportJob {
-  id          String      @id @default(uuid())
+  id          String       @id @default(uuid())
   workspaceId String
   type        String
   source      String
-  status      JobStatus   @default(QUEUED)
+  status      JobStatus    @default(QUEUED)
   error       String?
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime     @default(now())
   completedAt DateTime?
-  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   items       ImportItem[]
 
   @@index([workspaceId, createdAt])
