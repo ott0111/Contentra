@@ -291,27 +291,55 @@ export async function registerRoutes(app: FastifyInstance) {
     }
   });
 
-  app.post("/api/v1/auth/login", async (request, reply) => {
-    const input = loginSchema.parse(request.body);
-    const user = await verifyPassword(input.email, input.password);
-    if (!user)
-      return fail(
-        reply,
-        401,
-        "INVALID_CREDENTIALS",
-        "Email or password is incorrect.",
-      );
-    const session = await createSession(user.id);
-    reply.header("set-cookie", sessionCookie(session, 30 * 86400));
-    return json(reply, {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        emailVerified: Boolean(user.emailVerifiedAt),
-      },
-    });
+ app.post("/api/v1/auth/login", async (request, reply) => {
+  const input = loginSchema.parse(request.body);
+  const user = await verifyPassword(input.email, input.password);
+
+  if (!user)
+    return fail(
+      reply,
+      401,
+      "INVALID_CREDENTIALS",
+      "Email or password is incorrect.",
+    );
+
+  const session = await createSession(user.id);
+  reply.header("set-cookie", sessionCookie(session, 30 * 86400));
+
+  let memberships = await prisma.workspaceMember.findMany({
+    where: { userId: user.id },
+    include: { workspace: true },
   });
+
+  if (memberships.length === 0) {
+    const workspace = await createDefaultWorkspace(user.id, user.name);
+
+    memberships = [
+      {
+        workspace,
+      },
+    ] as typeof memberships;
+  }
+
+  return json(reply, {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      emailVerified: Boolean(user.emailVerifiedAt),
+    },
+    workspace: {
+      id: memberships[0].workspace.id,
+      name: memberships[0].workspace.name,
+      type: memberships[0].workspace.type,
+    },
+    workspaces: memberships.map((membership) => ({
+      id: membership.workspace.id,
+      name: membership.workspace.name,
+      type: membership.workspace.type,
+    })),
+  });
+});
 
   app.post("/api/v1/auth/logout", async (request, reply) => {
     await destroySession(
