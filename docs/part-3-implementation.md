@@ -23,7 +23,7 @@
 - Controlled external Business API endpoints using scoped API keys.
 - Webhook endpoint with encrypted secrets, HMAC signature verification, event allow-listing and duplicate-event idempotency.
 - Website public URL validation and scanning foundation with DNS/private-network SSRF protection, redirect revalidation, size/time limits and scan history.
-- Billing checkout foundation using Stripe REST API when secret and price IDs are configured.
+- Billing checkout foundation using the Paddle Billing API when `PADDLE_API_KEY` and price IDs are configured, with signature-verified, idempotent webhooks and a centralized entitlement layer (admin override > Paddle > Free).
 - Notification read/list endpoints plus a `createNotification` service that writes a row and, when `push: true`, enqueues an idempotent `push_delivery` job (`push:<notificationId>` key).
 - Database-backed job queue abstraction with bounded exponential retry behavior.
 - Standard queue handlers: `push_delivery` (delegates to `sendPushToWorkspace`) and `cleanup` (expired sessions/verification/password-reset tokens; NEW→EXPIRED transitions on Opportunity/Recommendation/NextBestAction).
@@ -58,7 +58,7 @@
 The following remain configuration/provider dependent rather than being simulated:
 - Email delivery unless `EMAIL_WEBHOOK_URL` + `EMAIL_WEBHOOK_SECRET` are configured.
 - Gemini responses unless `GEMINI_API_KEY` is configured.
-- Stripe checkout unless Stripe secret + price IDs are configured.
+- Paddle checkout unless `PADDLE_API_KEY` + price IDs are configured.
 - Social publishing/OAuth/sync adapters for Instagram, TikTok, YouTube and X; no fake connected states were added.
 - Object storage until a concrete storage provider is configured.
 - Business data until a real business integration supplies it.
@@ -101,7 +101,7 @@ At minimum configure:
 - `WEB_ORIGIN`
 - Email delivery (`EMAIL_WEBHOOK_URL`, `EMAIL_WEBHOOK_SECRET`) or replace with a production email adapter.
 - `GEMINI_API_KEY` and optionally `GEMINI_MODEL`.
-- Stripe secret + `STRIPE_PRO_PRICE_ID` + `STRIPE_BUSINESS_PRICE_ID` for billing.
+- `PADDLE_API_KEY` + `PADDLE_PRO_PRICE_ID` + `PADDLE_BUSINESS_PRICE_ID` + `PADDLE_AGENCY_PRICE_ID` (+ `PADDLE_WEBHOOK_SECRET`) for billing. Without them the app runs on Free; checkout returns 503.
 - Provider-specific social/business credentials and OAuth callback URLs before enabling those integrations.
 - Production object storage credentials before enabling private asset storage.
 - Push: `EXPO_ACCESS_TOKEN` on the API and `EXPO_PROJECT_ID`; clients need `EXPO_PUBLIC_PROJECT_ID` and `EXPO_PUBLIC_API_URL`. Without these the push job is a truthful no-op.
@@ -147,4 +147,4 @@ Executed against the real environment: Windows 11, Node.js v22.23.2, pnpm 10.12.
 - `prisma validate` clean; `prisma migrate status` — database schema up to date (1 migration).
 
 ### Still external / environment-dependent
-- Live Gemini, Stripe checkout, social/business publisher adapters, OAuth providers, and Expo push remain gated on real provider credentials (see README env vars). Physical device/mobile-native QA not run on this machine.
+- Live Gemini, Paddle checkout, social/business publisher adapters, OAuth providers, and Expo push remain gated on real provider credentials (see README env vars). Physical device/mobile-native QA not run on this machine.

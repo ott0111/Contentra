@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { BusinessShell } from '@/components/business-shell';
 import { Button, Card, EmptyState, Metric, PageHeader, Skeleton } from '@/components/ui';
 import { api, ApiClientError } from '@/lib/api';
+import { LockedGate } from '@/components/locked';
 
 type Row = { id: string; externalId: string; integrationId: string; data: Record<string, unknown> };
 const KINDS = ['customers', 'leads', 'products', 'orders', 'conversions'] as const;
@@ -11,14 +12,15 @@ const KINDS = ['customers', 'leads', 'products', 'orders', 'conversions'] as con
 export default function Page() {
   const [data, setData] = useState<Record<string, Row[]> | null>(null);
   const [error, setError] = useState('');
+  const [errorCode, setErrorCode] = useState('');
   const workspace = () => localStorage.getItem('contentra_workspace') ?? '';
   const load = () => {
     const id = workspace();
     if (!id) return;
-    setData(null); setError('');
+    setData(null); setError(''); setErrorCode('');
     Promise.all(KINDS.map(async kind => {
       try { return [kind, await api<Row[]>(`/api/v1/business/${kind}?limit=100`, {}, id)] as const; }
-      catch { return [kind, null] as const; }
+      catch (e) { if (!errorCode && e instanceof ApiClientError) setErrorCode(e.code); return [kind, null] as const; }
     })).then(entries => {
       const map = Object.fromEntries(entries) as Record<string, Row[] | null>;
       if (KINDS.some(kind => map[kind] === null)) setError('Some business sources could not be loaded.');
@@ -30,7 +32,8 @@ export default function Page() {
     <div className="grid grid-4">
       {KINDS.map(kind => <Card key={kind}><Metric label={kind[0].toUpperCase() + kind.slice(1)} value={data ? String(data[kind].length) : '—'} /></Card>)}
     </div>
-    {error ? <div className="section"><EmptyState title="Business data is unavailable" description={error} action={<Button onClick={load}>Retry</Button>} /></div>
+    {errorCode ? <LockedGate code={errorCode} detail={error} />
+      : error ? <div className="section"><EmptyState title="Business data is unavailable" description={error} action={<Button onClick={load}>Retry</Button>} /></div>
       : data === null ? <div className="section"><Skeleton className="skeleton-block" /></div>
       : KINDS.some(kind => data[kind].length) ? <div className="section"><Card><h3>Recently synced</h3>
         {KINDS.filter(kind => data[kind].length).map(kind => <div key={kind} style={{ margin: '10px 0' }}><Link className="text-btn" href={`/app/business/${kind}`}>{kind[0].toUpperCase() + kind.slice(1)} · {data[kind].length} records</Link><br /><small className="muted">{data[kind].slice(0, 2).map(r => r.externalId).join(', ')}</small></div>)}

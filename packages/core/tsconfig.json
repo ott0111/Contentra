@@ -1,14 +1,7 @@
 {
-  "name": "@contentra/types",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "typecheck": "tsc -p tsconfig.json",
-    "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint ."
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
   },
-  "exports": {
-    ".": "./dist/index.js"
-  }
+  "include": ["src"]
 }

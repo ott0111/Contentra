@@ -4,6 +4,7 @@ const plans = [
   { code: 'FREE', name: 'Free', monthlyPriceCents: 0, entitlements: { workspaces: 1, team_members: 1, ai_credits: 100 } },
   { code: 'PRO', name: 'Pro', monthlyPriceCents: 1999, entitlements: { workspaces: 5, team_members: 5, ai_credits: 2000 } },
   { code: 'BUSINESS', name: 'Business', monthlyPriceCents: 4999, entitlements: { workspaces: 25, team_members: 50, ai_credits: 10000 } },
+  { code: 'AGENCY', name: 'Agency', monthlyPriceCents: 9999, entitlements: { workspaces: 100, team_members: 250, ai_credits: 25000 } },
 ];
 async function main() {
   for (const plan of plans) {

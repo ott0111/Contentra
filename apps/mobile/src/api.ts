@@ -50,6 +50,13 @@ async function request<T>(
   if (response.status === 401) {
     // The session is invalid or expired; force the sign-in screen on the next render.
     await SecureStore.deleteItemAsync(SESSION_KEY).catch(() => undefined);
+    unauthListeners.forEach((listener) => {
+      try {
+        listener();
+      } catch {
+        // listener errors must never break the request path
+      }
+    });
   }
   if (!response.ok) {
     throw new ApiError(
@@ -59,6 +66,14 @@ async function request<T>(
     );
   }
   return body?.data as T;
+}
+
+type UnauthenticatedListener = () => void;
+const unauthListeners = new Set<UnauthenticatedListener>();
+
+export function onUnauthenticated(listener: UnauthenticatedListener): () => void {
+  unauthListeners.add(listener);
+  return () => unauthListeners.delete(listener);
 }
 
 export const api = Object.assign(request, {

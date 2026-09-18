@@ -63,6 +63,14 @@ export function clearSessionCookie() {
   return `contentra_session=; Max-Age=0; Path=/; HttpOnly; ${cookiePolicy()}`;
 }
 
+export function adminSessionCookie(token: string, maxAgeSeconds: number) {
+  return `contentra_admin=${encodeURIComponent(token)}; Max-Age=${maxAgeSeconds}; Path=/; HttpOnly; ${cookiePolicy()}`;
+}
+
+export function clearAdminSessionCookie() {
+  return `contentra_admin=; Max-Age=0; Path=/; HttpOnly; ${cookiePolicy()}`;
+}
+
 function cookiePolicy() {
   // Production is cross-site: the web app (Vercel) and the API (Render) live on
   // different registrable domains, so the session cookie must be SameSite=None.

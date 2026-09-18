@@ -7,10 +7,11 @@ test('unauthenticated app requests are gated by the client shell', async ({ page
   await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
 });
 
-test('root redirects unauthenticated visitors to login', async ({ page }) => {
+test('root shows the landing page for unauthenticated visitors', async ({ page }) => {
   await page.goto('/');
-  await page.waitForURL('**/login*');
-  expect(page.url()).toContain('/login');
+  await expect(page.getByRole('heading', { name: /operating system for creators/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Create your free account' })).toBeVisible();
+  expect(page.url()).not.toContain('/login');
 });
 
 test('signup creates a real session and enters onboarding', async ({ page }) => {

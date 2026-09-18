@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes/index.js";
 import { registerBusinessRoutes } from "./routes/business.js";
 import { registerWebhookRoutes } from "./routes/webhooks.js";
 import { registerReleaseRoutes } from "./routes/releases.js";
+import { registerAdminRoutes } from "./routes/admin.js";
 import rawBody from "fastify-raw-body";
 import { prisma } from "./db.js";
 
@@ -70,6 +71,15 @@ const corsOrigins = (
 function isAllowedOrigin(origin: string): boolean {
   // Explicitly configured origins always take priority.
   if (corsOrigins.includes(origin)) {
+    return true;
+  }
+
+  // Tauri desktop webview origins (Windows: tauri://localhost, macOS/Linux: http(s)://tauri.localhost).
+  if (
+    origin === "tauri://localhost" ||
+    origin === "http://tauri.localhost" ||
+    origin === "https://tauri.localhost"
+  ) {
     return true;
   }
 
@@ -166,6 +176,7 @@ app.register(async (api) => {
   await registerBusinessRoutes(api);
   await registerWebhookRoutes(api);
   await registerReleaseRoutes(api);
+  await registerAdminRoutes(api);
 });
 
 app.setErrorHandler((err, req, reply) => {

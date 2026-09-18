@@ -23,9 +23,9 @@ test('fresh account completes onboarding end to end', async ({ page }) => {
     await page.getByRole('button', { name: 'Continue' }).click();
   }
   await expect(page.getByText('Step 10 of 10')).toBeVisible();
-  await page.getByRole('link', { name: 'Open Create' }).click();
-  await page.waitForURL('**/app/create');
-  await expect(page.getByRole('heading', { name: 'Create new content' })).toBeVisible();
+  await page.getByRole('link', { name: 'Open Creatos' }).click();
+  await page.waitForURL('**/creatos');
+  await expect(page.getByRole('heading', { name: 'Creatos' })).toBeVisible();
 
   const stored = await page.evaluate(() => localStorage.getItem('contentra_workspace'));
   expect(stored).toBeTruthy();
@@ -51,6 +51,12 @@ test('returning users land in the app, not onboarding', async ({ page }) => {
   expect(page.url()).toContain('/app');
   await expect(page.getByText('Good to see you.')).toBeVisible();
   expect(page.url()).not.toContain('/onboarding');
+});
+
+test('returning user with incomplete onboarding resumes onboarding', async ({ page }) => {
+  const { email, password } = await createUserViaApi('resumer', false);
+  await loginViaUi(page, email, password, '**/onboarding');
+  await expect(page.getByText('Step 1 of 10')).toBeVisible();
 });
 
 test('workspace type decides Business OS visibility', async ({ page }) => {

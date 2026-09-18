@@ -6,7 +6,7 @@ import { ReleaseNotice } from './release-notice';
 import { api, ApiClientError } from '@/lib/api';
 import { useCallback, useEffect, useState } from 'react';
 
-const nav=[['Home','/app'],['Blitz','/app/blitz'],['Inspiration','/app/inspiration'],['Create','/app/create'],['Content','/app/content'],['Library','/app/library'],['Calendar','/app/calendar'],['Analytics','/app/analytics']];
+const nav=[['Home','/app'],['Creatos','/creatos'],['Inspiration','/app/inspiration'],['Create','/app/create'],['Content','/app/content'],['Library','/app/library'],['Calendar','/app/calendar'],['Analytics','/app/analytics']];
 
 type Workspace = { id:string; name:string; type:string };
 type Me = { user:{id:string;name?:string|null;email:string}; workspaces:Array<{role:string;workspace:Workspace}> };

@@ -7,7 +7,7 @@ export function uniqueEmail(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@qa.contentra.local`;
 }
 
-export async function createUserViaApi(prefix: string) {
+export async function createUserViaApi(prefix: string, onboarded = true) {
   const email = uniqueEmail(prefix);
   let res: Response | undefined;
   for (let i = 0; i < 40; i++) {
@@ -27,8 +27,19 @@ export async function createUserViaApi(prefix: string) {
   const setCookie = res!.headers.get('set-cookie') ?? '';
   const token = /contentra_session=([^;]+)/.exec(setCookie)?.[1] ?? '';
   expect(token, 'signup should set a session cookie').toBeTruthy();
-  const ws = await createWorkspaceViaApi(token, 'My workspace', 'CREATOR');
-  return { email, password: PASSWORD, token: token!, workspaceId: ws.id };
+  const body = (await res!.json()) as { data: { workspace: { id: string } } };
+  const workspaceId = body.data.workspace?.id ?? '';
+  expect(workspaceId, 'signup should provision a workspace server-side').toBeTruthy();
+  if (onboarded) await completeOnboardingViaApi(token, workspaceId);
+  return { email, password: PASSWORD, token: token!, workspaceId };
+}
+
+export async function completeOnboardingViaApi(token: string, workspaceId: string) {
+  await fetch(`${API_URL}/api/v1/workspaces/${workspaceId}/onboarding`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json', cookie: `contentra_session=${token}` },
+    body: JSON.stringify({ currentStep: 9, completed: true }),
+  });
 }
 
 export async function createWorkspaceViaApi(token: string, name: string, type: string) {
@@ -50,14 +61,14 @@ export async function setupWorkspace(page: Page, name: string, type: string, pre
   return { token: user.token, workspaceId: ws.id };
 }
 
-export async function loginViaUi(page: Page, email: string, password: string) {
+export async function loginViaUi(page: Page, email: string, password: string, urlPattern = '**/app*') {
   await page.goto('/login');
   for (let i = 0; i < 40; i++) {
     await page.getByLabel('Email').fill(email);
     await page.getByLabel('Password').fill(password);
     await page.getByRole('button', { name: 'Sign in' }).click();
     try {
-      await page.waitForURL('**/app*', { timeout: 4000 });
+      await page.waitForURL(urlPattern, { timeout: 4000 });
       return;
     } catch {
       // still on /login; likely the auth rate limiter (10/min/IP). Back off and retry.

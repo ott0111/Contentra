@@ -25,16 +25,20 @@ export async function registerForPushNotifications(workspaceId: string, prompt =
   type NotifPerms = { granted?: boolean; ios?: { status?: number }; canAskAgain?: boolean };
 
   const settings = (await Notifications.getPermissionsAsync()) as unknown as NotifPerms;
-  const requested = ((await Notifications.requestPermissionsAsync()) as unknown as NotifPerms);
   const allowed =
     !!settings.granted ||
     settings.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL;
-  const granted =
-    allowed ||
-    (prompt &&
-      (!!requested.granted ||
-        requested.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL));
-  if (!granted) return { registered: false, reason: 'Notification permission is not granted.' };
+  if (!allowed) {
+    // Only actively prompt when the user asked for it (Settings screen).
+    if (!prompt)
+      return { registered: false, reason: 'Notification permission is not granted.' };
+    const requested = (await Notifications.requestPermissionsAsync()) as unknown as NotifPerms;
+    if (
+      !requested.granted &&
+      requested.ios?.status !== Notifications.IosAuthorizationStatus.PROVISIONAL
+    )
+      return { registered: false, reason: 'Notification permission is not granted.' };
+  }
 
   const projectId = process.env.EXPO_PUBLIC_PROJECT_ID;
   if (!projectId) return { registered: false, reason: 'EXPO_PUBLIC_PROJECT_ID is not configured.' };

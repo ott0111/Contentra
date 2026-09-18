@@ -12,7 +12,7 @@ browser / mobile / desktop  →  https://api.contentra.app  →  PostgreSQL
                                         ├─ push (Expo)
                                         ├─ email (webhook)
                                         ├─ AI (Gemini)
-                                        ├─ billing (Stripe)
+                                        ├─ billing (Paddle)
                                         ├─ social OAuth (IG/TikTok/YT/X)
                                         └─ object storage (S3-compatible)
                      worker  →  same Job queue in PostgreSQL
@@ -25,7 +25,7 @@ browser / mobile / desktop  →  https://api.contentra.app  →  PostgreSQL
 
 ## 2. Environment separation (verified)
 
-- **Server-only vars** (API/worker): `DATABASE_URL`, `SESSION_SECRET`, `ENCRYPTION_KEY`, all `*_CLIENT_SECRET`, `STRIPE_*`, `GEMINI_API_KEY`, `EMAIL_WEBHOOK_*`, `STORAGE_*`, `EXPO_ACCESS_TOKEN`, `RELEASES_ADMIN_TOKEN`, `PORT`, `LOG_LEVEL`, `TRUST_PROXY`, `WORKER_POLL_MS`, `CREDIT_COST_*`.
+- **Server-only vars** (API/worker): `DATABASE_URL`, `SESSION_SECRET`, `ENCRYPTION_KEY`, all `*_CLIENT_SECRET`, `PADDLE_*`, `GEMINI_API_KEY`, `EMAIL_WEBHOOK_*`, `STORAGE_*`, `EXPO_ACCESS_TOKEN`, `RELEASES_ADMIN_TOKEN`, `ADMIN_ROOT_EMAIL`, `PORT`, `LOG_LEVEL`, `TRUST_PROXY`, `WORKER_POLL_MS`, `CREDIT_COST_*`.
 - **Client-exposed vars** (embedded in bundles): `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_DEVELOPMENT_PREVIEW`, `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_PROJECT_ID`, `VITE_API_URL`. Never put secrets in these.
 - Reference copies: root `.env.example`, plus `apps/api/.env.example`, `apps/web/.env.example`, `apps/mobile/.env.example`, `apps/desktop/.env.example`.
 - **Preview gate**: `NEXT_PUBLIC_DEVELOPMENT_PREVIEW=1` is honored only when the bundle is built with `NODE_ENV=development`/`test`. A production build (`next build`) can never enable the preview environment. This was verified by building the production bundle and confirming the gate code path.
@@ -69,7 +69,7 @@ As of this document, no production infrastructure, DNS/HTTPS, or provider creden
 - Web responses include `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security: max-age=63072000; includeSubDomains`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy` (camera/mic/geolocation blocked) via `apps/web/next.config.mjs`.
 - HTTPS termination at the edge (TLS provider/plat-platform); the API should run behind it with `TRUST_PROXY=1` so rate limiter/IP log honor `X-Forwarded-For`. Only enable when the proxy is trusted.
 - **Verified**: a production web bundle built with `NEXT_PUBLIC_API_URL=https://api.contentra.app` contains **zero** `localhost`/`127.0.0.1` references to the API and bakes the real URL. Dev defaults remain only in source and are overridden by env at build time.
-- API link-building uses `WEB_ORIGIN` (verification/reset/invite/Stripe success+return). Any stale default in prod would send users invalid links; deploy tools must inject the real origins.
+- API link-building uses `WEB_ORIGIN` (verification/reset/invite/Paddle success+return). Any stale default in prod would send users invalid links; deploy tools must inject the real origins.
 
 ## 8. Secrets and logging
 
@@ -100,7 +100,7 @@ Without credentials, the API **fails honestly**; it never fabricates connected a
 
 - AI → HTTP 503 `AI_NOT_CONFIGURED`
 - Social connect → HTTP 503 `PROVIDER_NOT_CONFIGURED`
-- Stripe checkout → HTTP 503 (price IDs unset); invalid/absent webhook secret → 401, no state change
+- Paddle checkout → HTTP 503 `BILLING_NOT_CONFIGURED` (Paddle key or price IDs unset); the app keeps running on Free. Invalid/absent Paddle webhook signature → 401 `INVALID_PADDLE_SIGNATURE`, no state change; events idempotent per event id.
 - Email → sender null; deliveries reported `pending`; `forgot-password` accepts without sending
 - Push → delivery status `not_configured`
 - Storage (S3-compatible) → production now **fails closed** (`STORAGE_NOT_CONFIGURED`) instead of silently falling back to the local disk unless `STORAGE_PROVIDER=local` is explicitly chosen (single-instance self-host only)

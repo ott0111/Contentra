@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 const previewRoutes: Record<string, string> = {
-  blitz: "/app/blitz", inspiration: "/app/inspiration", create: "/app/create", content: "/app/content",
+  blitz: "/creatos", creatos: "/creatos", inspiration: "/app/inspiration", create: "/app/create", content: "/app/content",
   library: "/app/library", calendar: "/app/calendar", analytics: "/app/analytics", settings: "/app/settings/account",
 };
 

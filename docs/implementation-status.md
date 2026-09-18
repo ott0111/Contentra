@@ -59,13 +59,13 @@ Environment this run: Windows 11, Node v22.23.2, pnpm 10.12.1, PostgreSQL availa
 - **Tests fixed in this pass**: fresh-signup onboarding workspace bootstrap; workspace owner delete with typed-name confirmation; API CORS allow-methods missing PUT (blocked onboarding saves); missing Tauri Windows icon.
 - **New QA entrypoint**: `pnpm --filter @contentra/web test:e2e`.
 
-Still environment/externally dependent: Gemini, Stripe (TEST only), OAuth, social/business publishers, Expo push, production object storage, and any physical-device QA.
+Still environment/externally dependent: Gemini, Paddle (live/sandbox creds), OAuth, social/business publishers, Expo push, production object storage, and any physical-device QA.
 
 ## Part 4 production readiness (2026-09-13)
 
 Production-mode verification and hardening on the same machine. Everything below is the verified production *code path*; live deployment is still BLOCKED on real hosting/DNS/credentials (see the A–F report in the Part 4 transcript and `docs/deployment.md`).
 
-- **Provider-credential audit** — every missing provider reports a truthful unprovisioned state; verified live against the production-mode API: AI 503 `AI_NOT_CONFIGURED`, social connect 503 `PROVIDER_NOT_CONFIGURED`, Stripe checkout 503 (unset price IDs), `forgot-password` accepted with no fabricated email, releases endpoint public. No fake success anywhere.
+- **Provider-credential audit** — every missing provider reports a truthful unprovisioned state; verified live against the production-mode API: AI 503 `AI_NOT_CONFIGURED`, social connect 503 `PROVIDER_NOT_CONFIGURED`, Paddle checkout 503 `BILLING_NOT_CONFIGURED` (unset key/price IDs), unsigned Paddle webhook 401 `INVALID_PADDLE_SIGNATURE`, `forgot-password` accepted with no fabricated email, releases endpoint public. No fake success anywhere.
 - **Database migration path verified** — created a fresh `contentra_prod` database and deployed with `prisma migrate deploy` (never `migrate dev`); `migrate status` = up to date. **Blocker found and fixed**: workspace creation requires FREE/PRO/BUSINESS plans + entitlements which only existed on the dev DB because of manual seeding; added data migration `20260914000000_seed_reference_data` (idempotent, works on fresh AND pre-seeded DBs). Same migration applied to the dev DB for parity.
 - **Infrastructure hardening (code)**
   - Job queue claim is now atomic (`updateMany` conditional on `QUEUED`) — safe with multiple workers; worker gains SIGTERM/SIGINT graceful drain (`services/processing`, `apps/api/src/worker.ts`).

@@ -66,7 +66,16 @@ async function fetchPinned(url: URL, pinnedAddress: string, maxBytes: number) {
           port,
           path: `${url.pathname}${url.search}`,
           method: 'GET',
-          lookup: (_hostname, _options, callback) => callback(null, pinnedAddress, net.isIP(pinnedAddress)),
+          lookup: (_hostname, options, callback) => {
+            const family = net.isIP(pinnedAddress);
+            // Node 20+ Happy Eyeballs asks for `all` addresses; keep the
+            // validated address authoritative instead of an empty result.
+            if (options.all) {
+              callback(null, [{ address: pinnedAddress, family }]);
+              return;
+            }
+            callback(null, pinnedAddress, family);
+          },
           servername: isHttps ? url.hostname : undefined,
           rejectUnauthorized: true,
           timeout: 10_000,

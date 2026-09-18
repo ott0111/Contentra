@@ -4,13 +4,17 @@ import {
   createContentSchema,
   createWorkspaceSchema,
   emailVerificationSchema,
+  funnelEventSchema,
   loginSchema,
   onboardingStateSchema,
   passwordResetRequestSchema,
   passwordResetSchema,
   signupSchema,
+  updateCampaignSchema,
   updateContentSchema,
   updateProfileSchema,
+  updateWorkspaceSchema,
+  urlAnalyzeSchema,
 } from "@contentra/validation";
 import { can } from "@contentra/core";
 import { prisma } from "../db.js";
@@ -40,7 +44,11 @@ import {
 import { aiActionSchema } from "@contentra/validation";
 import { GeminiProvider } from "@contentra/ai";
 import { requiresConfirmation } from "@contentra/ai";
-import { createWorkspace, getMembership } from "../services/workspaces.js";
+import {
+  createDefaultWorkspace,
+  createWorkspace,
+  getMembership,
+} from "../services/workspaces.js";
 import {
   createContent,
   listContent,
@@ -48,8 +56,21 @@ import {
 } from "../services/content.js";
 import { getHome } from "../services/home.js";
 import { configuredEmailSender } from "../services/email.js";
-import { createStripeCheckout } from "../services/billing.js";
+import {
+  createPaddleCheckout,
+  PaddleConfigError,
+  priceIdForPlan,
+  type PaddlePlan,
+} from "../services/paddle.js";
+import { assertFeature, assertLimit, effectivePlan, EntitlementError, getPlanScope } from "../services/entitlements.js";
 import { fetchPublicPage, validatePublicHttpUrl } from "../services/website.js";
+import {
+  claimReferral,
+  completeReferralAndReward,
+  getOrCreateReferralCode,
+  isInvalidError,
+  listReferralStats,
+} from "../services/referrals.js";
 import {
   completeSocialConnection,
   disconnectSocialConnection,
@@ -59,7 +80,7 @@ import {
 } from "../services/social.js";
 import { ProviderError } from "@contentra/integrations";
 import { Prisma } from "@prisma/client";
-import type { WorkspaceRole } from "@contentra/types";
+import type { ContentStatus, WorkspaceRole } from "@contentra/types";
 
 type AnalyticsMetric = {
   capturedAt: Date;
@@ -89,6 +110,37 @@ function isInputJsonValue(value: unknown): value is Prisma.InputJsonValue {
   return Object.values(value).every(
     (entry) => entry === null || isInputJsonValue(entry),
   );
+}
+
+// Public, no-auth landing analyzer. Returns only derived, non-persisted page
+// metrics for the logged-out analyzer widget — never raw fetched content.
+function analyzePublicHtml(url: string, html: string) {
+  const clean = (value: string) => value.replace(/\s+/g, " ").trim();
+  const title = clean(/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "");
+  const description = clean(
+    /<meta[^>]+name=["']description["'][^>]*content=["']([^"']*)["']/i.exec(html)?.[1] ??
+      /<meta[^>]+content=["']([^"']*)["'][^>]*name=["']description["']/i.exec(html)?.[1] ??
+      "",
+  );
+  const count = (pattern: RegExp) => (html.match(pattern) ?? []).length;
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const wordCount = text ? text.split(" ").length : 0;
+  return {
+    url,
+    title: title || null,
+    description: description || null,
+    wordCount,
+    readMinutes: Math.max(1, Math.round(wordCount / 200)),
+    headings: { h1: count(/<h1[\s>]/gi), h2: count(/<h2[\s>]/gi) },
+    images: count(/<img[\s>]/gi),
+    links: count(/<a[\s>]/gi),
+    hasOpenGraph: /<meta[^>]+property=["']og:/i.test(html),
+  };
 }
 
 const json = (reply: FastifyReply, data: unknown, status = 200) =>
@@ -179,6 +231,35 @@ export async function registerRoutes(app: FastifyInstance) {
       }
       const session = await createSession(result.user.id);
       reply.header("set-cookie", sessionCookie(session, 30 * 86400));
+      // Every account is provisioned with a default workspace server-side so
+      // clients never have to create one themselves.
+      const workspace = await createDefaultWorkspace(
+        result.user.id,
+        result.user.name,
+      );
+      // A `ref` param at signup claims the PENDING referral so the reward can
+      // be granted later, exactly once, when onboarding completes.
+      if (input.ref) {
+        try {
+          await claimReferral({
+            workspaceId: workspace.id,
+            code: input.ref,
+            referredUserId: result.user.id,
+            requesterUserId: result.user.id,
+          });
+          await prisma.funnelEvent.create({
+            data: {
+              event: "referral.claimed_at_signup",
+              clientId: null,
+              ref: input.ref,
+              meta: { workspaceId: workspace.id },
+            },
+          });
+        } catch (error) {
+          // A bad/self/duplicate code must never block account creation.
+          if (!isInvalidError(error)) throw error;
+        }
+      }
       // Verification delivery is provider-dependent. Never expose a token through this API.
       return json(
         reply,
@@ -188,6 +269,11 @@ export async function registerRoutes(app: FastifyInstance) {
             name: result.user.name,
             email: result.user.email,
             emailVerified: false,
+          },
+          workspace: {
+            id: workspace.id,
+            name: workspace.name,
+            type: workspace.type,
           },
           verificationDelivery: "pending",
         },
@@ -367,15 +453,12 @@ export async function registerRoutes(app: FastifyInstance) {
   app.patch("/api/v1/workspaces/:workspaceId", async (request, reply) => {
     const ctx = await workspaceAuth(request, reply, "workspace.update");
     if (!ctx) return;
-    const body = request.body as {
-      name?: string;
-      type?: "CREATOR" | "PERSONAL_BRAND" | "BUSINESS" | "AGENCY";
-    };
+    const input = updateWorkspaceSchema.parse(request.body);
     const workspace = await prisma.workspace.update({
       where: { id: ctx.workspaceId },
       data: {
-        ...(body.name ? { name: body.name.trim() } : {}),
-        ...(body.type ? { type: body.type } : {}),
+        ...(input.name ? { name: input.name.trim() } : {}),
+        ...(input.type ? { type: input.type } : {}),
       },
     });
     return json(reply, workspace);
@@ -453,10 +536,28 @@ export async function registerRoutes(app: FastifyInstance) {
           entityId: ctx.workspaceId,
         },
       });
+      // Granting the referral reward is idempotent (CAS on PENDING) and also
+      // acts as the funnel "referral.completed" event for the referring side.
+      if (input.completed) {
+        await completeReferralAndReward({
+          workspaceId: ctx.workspaceId,
+          referredUserId: ctx.session.user.id,
+        });
+      }
       return json(reply, {
         state: workspace.onboardingState,
         completedAt: workspace.onboardedAt,
       });
+    },
+  );
+  app.get(
+    "/api/v1/workspaces/:workspaceId/referral",
+    async (request, reply) => {
+      const ctx = await workspaceAuth(request, reply, "workspace.read");
+      if (!ctx) return;
+      const code = await getOrCreateReferralCode(ctx.workspaceId);
+      const stats = await listReferralStats(ctx.workspaceId);
+      return json(reply, { code: code.code, createdAt: code.createdAt, stats });
     },
   );
   app.post(
@@ -464,6 +565,17 @@ export async function registerRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const ctx = await workspaceAuth(request, reply, "members.invite");
       if (!ctx) return;
+      try {
+        // Team seats are a paid entitlement: Free includes 1 seat (the owner).
+        const memberCount = await prisma.workspaceMember.count({
+          where: { workspaceId: ctx.workspaceId },
+        });
+        await assertLimit(ctx.workspaceId, "team_members", memberCount + 1);
+      } catch (error) {
+        if (error instanceof EntitlementError)
+          return fail(reply, 403, error.code, error.message);
+        throw error;
+      }
       const body = request.body as {
         email?: string;
       role?: WorkspaceRole;
@@ -1124,8 +1236,18 @@ export async function registerRoutes(app: FastifyInstance) {
   app.get("/api/v1/workspaces/:workspaceId/content", async (request, reply) => {
     const ctx = await workspaceAuth(request, reply, "content.read");
     if (!ctx) return;
-    const status = (request.query as { status?: string }).status as never;
-    return json(reply, await listContent(ctx.workspaceId, status));
+    const status = (request.query as { status?: string }).status;
+    if (
+      status !== undefined &&
+      !["IDEA", "DRAFT", "READY", "SCHEDULED", "PUBLISHED", "FAILED", "ARCHIVED"].includes(
+        status,
+      )
+    )
+      return fail(reply, 400, "INVALID_STATUS", "Unknown content status.");
+    return json(
+      reply,
+      await listContent(ctx.workspaceId, status as ContentStatus | undefined),
+    );
   });
   app.post(
     "/api/v1/workspaces/:workspaceId/content",
@@ -1146,14 +1268,23 @@ export async function registerRoutes(app: FastifyInstance) {
       const ctx = await workspaceAuth(request, reply, "content.update");
       if (!ctx) return;
       const input = updateContentSchema.parse(request.body);
-      return json(
-        reply,
-        await updateContent(
+      try {
+        const content = await updateContent(
           ctx.workspaceId,
           String((request.params as { contentId: string }).contentId),
           input,
-        ),
-      );
+        );
+        return json(reply, content);
+      } catch (error) {
+        if (error instanceof Error && error.message === "CONTENT_NOT_FOUND")
+          return fail(
+            reply,
+            404,
+            "CONTENT_NOT_FOUND",
+            "Content was not found.",
+          );
+        throw error;
+      }
     },
   );
   app.delete(
@@ -1470,42 +1601,34 @@ export async function registerRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const ctx = await workspaceAuth(request, reply, "billing.manage");
       if (!ctx) return;
-      const body = request.body as { plan?: "PRO" | "BUSINESS" };
-      const priceId =
-        body.plan === "PRO"
-          ? process.env.STRIPE_PRO_PRICE_ID
-          : body.plan === "BUSINESS"
-            ? process.env.STRIPE_BUSINESS_PRICE_ID
-            : undefined;
-      if (!priceId)
+      const body = request.body as { plan?: PaddlePlan };
+      if (
+        body.plan !== "PRO" &&
+        body.plan !== "BUSINESS" &&
+        body.plan !== "AGENCY"
+      )
+        return fail(reply, 400, "INVALID_PLAN", "Choose a paid plan to upgrade to.");
+      if (!priceIdForPlan(body.plan))
         return fail(
           reply,
           503,
           "BILLING_NOT_CONFIGURED",
-          "The selected billing plan is not configured.",
+          `Paddle is not configured for the ${body.plan} plan.`,
         );
       try {
         const origin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
         return json(
           reply,
-          await createStripeCheckout(
+          await createPaddleCheckout(
             ctx.workspaceId,
-            priceId,
+            body.plan,
             `${origin}/app/settings/billing?checkout=success`,
             `${origin}/app/settings/billing?checkout=cancel`,
           ),
         );
       } catch (error) {
-        if (
-          error instanceof Error &&
-          error.message === "BILLING_NOT_CONFIGURED"
-        )
-          return fail(
-            reply,
-            503,
-            "BILLING_NOT_CONFIGURED",
-            "Billing is not configured.",
-          );
+        if (error instanceof PaddleConfigError)
+          return fail(reply, 503, "BILLING_NOT_CONFIGURED", error.message);
         throw error;
       }
     },
@@ -1601,11 +1724,27 @@ export async function registerRoutes(app: FastifyInstance) {
   app.get("/api/v1/workspaces/:workspaceId/billing", async (request, reply) => {
     const ctx = await workspaceAuth(request, reply, "billing.read");
     if (!ctx) return;
-    const subscription = await prisma.subscription.findUnique({
-      where: { workspaceId: ctx.workspaceId },
-      include: { plan: { include: { entitlements: true } } },
+    const [subscription, scope] = await Promise.all([
+      prisma.subscription.findUnique({
+        where: { workspaceId: ctx.workspaceId },
+        include: { plan: { include: { entitlements: true } } },
+      }),
+      getPlanScope(ctx.workspaceId),
+    ]);
+    return json(reply, {
+      subscription,
+      effectivePlanCode: effectivePlan(scope),
+      override: scope.override,
+      paddleConfigured: {
+        checkout: Boolean(
+          process.env.PADDLE_API_KEY &&
+            priceIdForPlan("PRO") &&
+            priceIdForPlan("BUSINESS") &&
+            priceIdForPlan("AGENCY"),
+        ),
+        webhooks: Boolean(process.env.PADDLE_WEBHOOK_SECRET),
+      },
     });
-    return json(reply, subscription);
   });
   app.get(
     "/api/v1/workspaces/:workspaceId/ai-credits",
@@ -1905,6 +2044,13 @@ export async function registerRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const ctx = await workspaceAuth(request, reply, "campaigns.manage");
       if (!ctx) return;
+      try {
+        await assertFeature(ctx.workspaceId, "campaigns");
+      } catch (error) {
+        if (error instanceof EntitlementError)
+          return fail(reply, 403, error.code, error.message);
+        throw error;
+      }
       return json(
         reply,
         await prisma.campaign.findMany({
@@ -1920,6 +2066,13 @@ export async function registerRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const ctx = await workspaceAuth(request, reply, "campaigns.manage");
       if (!ctx) return;
+      try {
+        await assertFeature(ctx.workspaceId, "campaigns");
+      } catch (error) {
+        if (error instanceof EntitlementError)
+          return fail(reply, 403, error.code, error.message);
+        throw error;
+      }
       const body = request.body as {
         name?: string;
         description?: string;
@@ -1950,17 +2103,18 @@ export async function registerRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const ctx = await workspaceAuth(request, reply, "campaigns.manage");
       if (!ctx) return;
+      try {
+        await assertFeature(ctx.workspaceId, "campaigns");
+      } catch (error) {
+        if (error instanceof EntitlementError)
+          return fail(reply, 403, error.code, error.message);
+        throw error;
+      }
       const id = String((request.params as { id: string }).id);
-      const body = request.body as {
-        name?: string;
-        description?: string;
-        goal?: string;
-        status?: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED" | "ARCHIVED";
-        platforms?: string[];
-      };
+      const input = updateCampaignSchema.parse(request.body);
       const result = await prisma.campaign.updateMany({
         where: { id, workspaceId: ctx.workspaceId },
-        data: body,
+        data: input,
       });
       if (!result.count)
         return fail(
@@ -2027,6 +2181,10 @@ export async function registerRoutes(app: FastifyInstance) {
       };
       const limit = Math.min(Math.max(Number(q.limit ?? 50), 1), 100),
         page = Math.max(Number(q.page ?? 1), 1);
+      if (q.from && Number.isNaN(Date.parse(q.from)))
+        return fail(reply, 400, "INVALID_DATE", "The from date is invalid.");
+      if (q.to && Number.isNaN(Date.parse(q.to)))
+        return fail(reply, 400, "INVALID_DATE", "The to date is invalid.");
       const where = {
         workspaceId: ctx.workspaceId,
         ...(q.status ? { status: q.status } : {}),
@@ -2132,6 +2290,16 @@ export async function registerRoutes(app: FastifyInstance) {
         campaignId?: string | null;
       };
       const id = String((request.params as { id: string }).id);
+      if (
+        body.scheduledFor &&
+        Number.isNaN(Date.parse(body.scheduledFor))
+      )
+        return fail(
+          reply,
+          400,
+          "INVALID_DATE",
+          "The scheduled date is invalid.",
+        );
       if (
         body.contentId &&
         !(await prisma.content.findFirst({
@@ -2255,32 +2423,60 @@ export async function registerRoutes(app: FastifyInstance) {
           "AI_NOT_CONFIGURED",
           "Contentra AI is not configured in this environment.",
         );
+      const balance = await prisma.aICreditBalance.findUnique({
+        where: { workspaceId: ctx.workspaceId },
+      });
+      if (!balance || balance.balance <= 0)
+        return fail(
+          reply,
+          429,
+          "AI_CREDITS_EXHAUSTED",
+          "This workspace has no AI credits left. Upgrade your plan to get more.",
+        );
       const provider = new GeminiProvider(process.env.GEMINI_API_KEY);
       const result = await provider.generateText({
         model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
         input: JSON.stringify(input.input),
         context: { workspaceId: ctx.workspaceId, action: input.type },
       });
-      await prisma.aIUsage.create({
-        data: {
-          workspaceId: ctx.workspaceId,
-          userId: ctx.session.user.id,
-          operation: input.type,
-          provider: result.provider,
-          model: result.model,
-          inputUnits: result.inputUnits,
-          outputUnits: result.outputUnits,
-          creditCost: Math.max(
-            1,
-            Math.ceil((result.inputUnits + result.outputUnits) / 1000),
-          ),
-        },
-      });
+      const cost = Math.max(
+        1,
+        Math.ceil((result.inputUnits + result.outputUnits) / 1000),
+      );
+      const charged = Math.min(cost, balance.balance);
+      await prisma.$transaction([
+        prisma.aICreditBalance.update({
+          where: { id: balance.id },
+          data: { balance: { decrement: charged } },
+        }),
+        prisma.aICreditTransaction.create({
+          data: {
+            balanceId: balance.id,
+            workspaceId: ctx.workspaceId,
+            userId: ctx.session.user.id,
+            amount: -charged,
+            reason: `ai:${input.type}`,
+          },
+        }),
+        prisma.aIUsage.create({
+          data: {
+            workspaceId: ctx.workspaceId,
+            userId: ctx.session.user.id,
+            operation: input.type,
+            provider: result.provider,
+            model: result.model,
+            inputUnits: result.inputUnits,
+            outputUnits: result.outputUnits,
+            creditCost: cost,
+          },
+        }),
+      ]);
       return json(reply, {
         output: result.output,
         requiresConfirmation: confirm,
         provider: result.provider,
         model: result.model,
+        creditsCharged: charged,
       });
     },
   );
@@ -2449,6 +2645,54 @@ export async function registerRoutes(app: FastifyInstance) {
       return json(reply, { revoked: true });
     },
   );
+
+  app.post("/api/v1/public/funnel-events", async (request, reply) => {
+    const input = funnelEventSchema.parse(request.body);
+    const header = request.headers["x-client-id"];
+    const clientId =
+      typeof header === "string" ? header.trim().slice(0, 120) || null : null;
+    await prisma.funnelEvent.create({
+      data: {
+        event: input.event,
+        clientId,
+        ref: input.ref ?? null,
+        meta: {
+          ...(input.label ? { label: input.label } : {}),
+          ...(input.workspaceId ? { workspaceId: input.workspaceId } : {}),
+          ...(isInputJsonValue(input.meta) ? input.meta : {}),
+        } as Prisma.InputJsonValue,
+      },
+    });
+    return json(reply, { recorded: true }, 201);
+  });
+
+  app.post("/api/v1/public/analyze-url", async (request, reply) => {
+    const input = urlAnalyzeSchema.parse(request.body);
+    let url: URL;
+    try {
+      url = await validatePublicHttpUrl(input.url);
+    } catch (error) {
+      const code =
+        error instanceof Error && error.message === "PRIVATE_URL"
+          ? "URL_NOT_ALLOWED"
+          : "INVALID_URL";
+      return fail(reply, 400, code, "That website URL is not allowed.");
+    }
+    try {
+      const page = await fetchPublicPage(url.toString());
+      return json(reply, analyzePublicHtml(page.url, page.text));
+    } catch (error) {
+      // Network egress or upstream failures surface honestly; the landing never
+      // fabricates an analysis.
+      request.log.warn({ err: error }, "public analyze-url failed");
+      return fail(
+        reply,
+        503,
+        "ANALYZER_UNAVAILABLE",
+        "We couldn't analyze that page right now. Please try again shortly.",
+      );
+    }
+  });
 
   app.get("/api/v1/releases/latest", async (request, reply) => {
     const q = request.query as {

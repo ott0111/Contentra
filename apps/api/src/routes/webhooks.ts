@@ -2,9 +2,11 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { prisma } from "../db.js";
 import { decryptSecret, verifyWebhookSignature } from "../security.js";
 import {
-  processStripeEvent,
-  verifyStripeWebhook,
-} from "../services/billing.js";
+  processPaddleEvent,
+  supportedPaddleEvent,
+  verifyPaddleWebhookSignature,
+  type PaddleEvent,
+} from "../services/paddle.js";
 
 function isUniqueConstraintError(error: unknown) {
   return typeof error === "object" && error !== null && Reflect.get(error, "code") === "P2002";
@@ -12,87 +14,79 @@ function isUniqueConstraintError(error: unknown) {
 
 export async function registerWebhookRoutes(app: FastifyInstance) {
   app.post(
-    "/api/v1/webhooks/stripe",
+    "/api/v1/webhooks/paddle",
     { config: { rawBody: true } },
     async (
-    request: FastifyRequest & { rawBody?: string | Buffer },
+      request: FastifyRequest & { rawBody?: string | Buffer },
       reply: FastifyReply,
     ) => {
-    const raw = typeof request.rawBody === "string" ? request.rawBody : request.rawBody?.toString("utf8") ?? JSON.stringify(request.body);
-      const signature = request.headers["stripe-signature"];
-      if (typeof signature !== "string" || !verifyStripeWebhook(raw, signature))
+      const raw = typeof request.rawBody === "string" ? request.rawBody : request.rawBody?.toString("utf8") ?? JSON.stringify(request.body);
+      const signature = request.headers["paddle-signature"];
+      if (
+        typeof signature !== "string" ||
+        !verifyPaddleWebhookSignature(raw, signature)
+      )
         return reply
           .status(401)
           .send({
             error: {
-              code: "INVALID_STRIPE_SIGNATURE",
+              code: "INVALID_PADDLE_SIGNATURE",
               message:
-                "Stripe webhook signature is invalid or Stripe TEST webhooks are not configured.",
+                "Paddle webhook signature is invalid or Paddle webhooks are not configured.",
             },
             requestId: request.id,
           });
-      let event: {
-        id?: string;
-        type?: string;
-        data?: { object?: Record<string, unknown> };
-      };
+      let event: PaddleEvent;
       try {
-        event = JSON.parse(raw) as typeof event;
+        event = JSON.parse(raw) as PaddleEvent;
       } catch {
         return reply
           .status(400)
           .send({
             error: {
-              code: "INVALID_STRIPE_EVENT",
-              message: "Stripe sent an invalid event.",
+              code: "INVALID_PADDLE_EVENT",
+              message: "Paddle sent an invalid event.",
             },
             requestId: request.id,
           });
       }
-      if (!event.id || !event.type || !event.data?.object)
+      if (
+        !event.event_id ||
+        !event.event_type ||
+        !event.data ||
+        typeof event.data !== "object"
+      )
         return reply
           .status(400)
           .send({
             error: {
-              code: "INVALID_STRIPE_EVENT",
-              message: "Stripe event is incomplete.",
+              code: "INVALID_PADDLE_EVENT",
+              message: "Paddle event is incomplete.",
             },
             requestId: request.id,
           });
-      const supported = new Set([
-        "checkout.session.completed",
-        "customer.subscription.created",
-        "customer.subscription.updated",
-        "customer.subscription.deleted",
-        "invoice.payment_failed",
-        "invoice.payment_succeeded",
-      ]);
-      if (!supported.has(event.type))
+      if (!supportedPaddleEvent(event.event_type))
         return reply.send({
           data: { accepted: true, ignored: true },
           requestId: request.id,
         });
       try {
-        const result = await processStripeEvent({
-          id: event.id,
-          type: event.type,
-          data: { object: event.data.object },
-        });
+        const result = await processPaddleEvent(event);
         return reply.send({
           data: { accepted: true, ...result },
           requestId: request.id,
         });
       } catch (error) {
         request.log.error(
-          { error, stripeEventId: event.id },
-          "stripe webhook processing failed",
+          { error, paddleEventId: event.event_id },
+          "paddle webhook processing failed",
         );
         return reply
           .status(500)
           .send({
             error: {
-              code: "STRIPE_EVENT_PROCESSING_FAILED",
-              message: "The verified Stripe event could not be processed.",
+              code: "PADDLE_EVENT_PROCESSING_FAILED",
+              message: "The verified Paddle event could not be processed.",
             },
             requestId: request.id,
           });

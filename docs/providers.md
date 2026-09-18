@@ -14,12 +14,16 @@ General rules:
 - Not configured: AI endpoints return HTTP 503 `AI_NOT_CONFIGURED`. No AI output is fabricated.
 - Live verification: run `POST /api/v1/workspaces/:id/ai/actions` and confirm a real model response and `AIUsage` accounting.
 
-## 2. Billing — Stripe
+## 2. Billing — Paddle
 
-- Env: `STRIPE_SECRET_KEY` (live or test per environment), `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRO_PRICE_ID`, `STRIPE_BUSINESS_PRICE_ID`.
-- Portal: Stripe dashboard → Products (create recurring Pro $19.99/mo and Business $49.99/mo, copy price IDs), Developers → API keys, Webhooks → create endpoint `API_ORIGIN/api/v1/webhooks/stripe` with `checkout.session.completed` / `customer.subscription.*` events, copy `whsec_` secret.
-- Semantics: checkout returns 503 while price IDs are unset; webhook events are signature-verified (timestamp + HMAC, 300 s tolerance) and only then do subscription/plan states change.
-- Never mix test/live keys across environments.
+Entitlements are centralized: **Effective plan = admin override, else Paddle entitlement, else Free.** Free is not a Paddle product; no Paddle records ever represent Free.
+
+- Env: `PADDLE_API_KEY` (live or sandbox per environment), `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRO_PRICE_ID`, `PADDLE_BUSINESS_PRICE_ID`, `PADDLE_AGENCY_PRICE_ID`, `PADDLE_CLIENT_TOKEN` (optional, for the Paddle overlay checkout later), `PADDLE_ENV` (default `sandbox`).
+- Portal: Paddle Billing dashboard → Catalog/Prices (create recurring Pro $19.99/mo, Business $49.99/mo, Agency $99.99/mo; copy price IDs) → Developer Tools → API keys → Authentication/Webhooks → create endpoint `API_ORIGIN/api/v1/webhooks/paddle` with `subscription.*` and `transaction.*` events, copy the webhook **secret key**.
+- Checkout: `POST /api/v1/workspaces/:id/billing/checkout` → Paddle-hosted checkout (success/cancel return to `/app/settings/billing?checkout=success|cancel`). While `PADDLE_API_KEY` or the matching price ID is unset, checkout returns HTTP 503 `BILLING_NOT_CONFIGURED` and the app keeps running on Free.
+- Webhook: verified with the `Paddle-Signature` header (`ts=<unix>;h1=<hex>`, HMAC-SHA256 over `ts:rawBody`, 300 s tolerance). Invalid or unsigned → HTTP 401 `INVALID_PADDLE_SIGNATURE` and no state change. Events are idempotent (unique `[provider, eventType, event_id]`), recorded before processing, and acceptance is reported even for unsupported event types.
+- Admin entitlement grants (`/api/v1/admin/entitlements`, Director+) only write internal `EntitlementOverride` rows with audit trail; they **never** create or modify Paddle records.
+- Never mix sandbox/live keys across environments.
 
 ## 3. Push notifications — Expo
 
@@ -60,7 +64,7 @@ Security properties already hardcoded:
 ## 7. Verification matrix to run on go-live
 
 1. `GEMINI_API_KEY` → AI request returns content + credit change.
-2. Stripe TEST checkout → succeeds → webhook → subscription `active`; price change reflected on `/billing`.
+2. Paddle sandbox checkout → succeeds → webhook → subscription `active`; price change reflected on `/billing`.
 3. Each social platform → connect → authorize → callback stores encrypted token → `integrations` shows `connected`.
 4. Email webhook target receives verification/reset to a real inbox.
 5. `EXPO_ACCESS_TOKEN` + a registered device → push job `sent`.

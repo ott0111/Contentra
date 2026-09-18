@@ -1,10 +1,10 @@
-# Windows desktop (Tauri)
+﻿# Windows desktop (Tauri)
 
 The Windows app is a Tauri shell hosting a Vite React client. It uses the same API endpoint shapes and workspace headers as web and mobile. Authentication is the API's HTTP-only session cookie; only the current workspace ID is stored locally.
 
 Set `VITE_API_URL` to the API origin, install dependencies, then run `pnpm --filter @contentra/desktop dev` or `pnpm --filter @contentra/desktop tauri dev`. Build with `pnpm --filter @contentra/desktop build` followed by Tauri packaging.
 
-Set `VITE_API_URL` to the public API origin. Do not put server secrets in `VITE_*` variables. OAuth, AI, billing, and social integrations use API endpoints; completion is determined by refreshed backend state. The minimal Tauri opener plugin launches backend-issued OAuth and Stripe URLs in the system browser. Provider callbacks terminate at the API; after returning to the app the user refreshes integration or billing state. No provider token ever enters Tauri.
+Set `VITE_API_URL` to the public API origin. Do not put server secrets in `VITE_*` variables. OAuth, AI, billing, and social integrations use API endpoints; completion is determined by refreshed backend state. The minimal Tauri opener plugin launches backend-issued OAuth and Paddle checkout URLs in the system browser. Provider callbacks terminate at the API; after returning to the app the user refreshes integration or billing state. No provider token ever enters Tauri.
 
 Windows packaging needs Rust, Windows build tools, WebView2, and the Tauri CLI prerequisites.
 

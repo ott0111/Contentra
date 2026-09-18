@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { activeNav, collectErrors, expectNoAppErrors, navLink, setupWorkspace } from './helpers';
 
-const NAV = ['Home', 'Blitz', 'Inspiration', 'Create', 'Content', 'Library', 'Calendar', 'Analytics'];
+const NAV = ['Home', 'Creatos', 'Inspiration', 'Create', 'Content', 'Library', 'Calendar', 'Analytics'];
 
 test('security headers are served with the app', async ({ request }) => {
   const res = await request.get('/login');
@@ -47,13 +47,13 @@ test('browser back and forward keep app state', async ({ page }) => {
   await setupWorkspace(page, 'QA Shell', 'CREATOR');
 
   await page.goto('/app');
-  await navLink(page, 'Blitz').click();
-  await page.waitForURL('**/app/blitz');
+  await navLink(page, 'Creatos').click();
+  await page.waitForURL('**/creatos');
   await page.goBack();
   await page.waitForURL('**/app');
   await page.goForward();
-  await page.waitForURL('**/app/blitz');
-  await expect(activeNav(page, 'Blitz')).toHaveCount(1);
+  await page.waitForURL('**/creatos');
+  await expect(activeNav(page, 'Creatos')).toHaveCount(1);
 });
 
 test('Ctrl/Cmd+K opens and closes the search dialog', async ({ page }) => {
