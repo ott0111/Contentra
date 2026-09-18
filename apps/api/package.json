@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "node --import tsx --env-file=../../.env src/server.ts",
     "worker": "tsx --env-file=../../.env src/worker.ts",
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.build.json",
+    "build": "pnpm prisma:generate && tsc -p tsconfig.build.json",
+    "typecheck": "pnpm prisma:generate && tsc -p tsconfig.build.json",
     "test": "vitest run",
     "prisma:generate": "prisma generate --schema=../../prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=../../prisma/schema.prisma",
