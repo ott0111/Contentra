@@ -1,5 +1,622 @@
-'use client';
-import { useEffect, useState } from 'react';import { Button, Card } from '@/components/ui';import { api } from '@/lib/api';
-const steps=[['Welcome','Set up the context that makes Contentra useful from day one.'],['What are you building?','Choose the setup that best matches your work.'],['Niche / category','Tell Contentra what you create or what your business does.'],['Goals','Choose the outcomes that matter most.'],['Connect context','Connect accounts or skip for now.'],['Analyze','Contentra will analyze your available context.'],['Here’s what we learned','Review generated Brand Intelligence when available.'],['Content preferences','Choose platforms, formats, style, and cadence.'],['First opportunity','Start with an opportunity surfaced from your workspace.'],['First content','Bring that context into Create.']];
-const options=[['Creator','CREATOR'],['Personal Brand','PERSONAL_BRAND'],['Business','BUSINESS'],['Agency','AGENCY']] as const;
-export default function Onboarding(){const [step,setStep]=useState(0);const [type,setType]=useState('');const [goals,setGoals]=useState<string[]>([]);const [niche,setNiche]=useState('');const [workspaceId,setWorkspaceId]=useState('');const [error,setError]=useState('');const goalOptions=['Grow audience','Get more views','Increase engagement','Generate leads','Drive sales','Build authority','Stay consistent','Understand what content works'];useEffect(()=>{let cancelled=false;const restore=async (id:string)=>{setWorkspaceId(id);try{api<{state?:{currentStep?:number;workspaceType?:string;goals?:string[];niche?:string}}>(`/api/v1/workspaces/${id}/onboarding`,{},id).then(x=>{if(cancelled)return;setStep(x.state?.currentStep??0);setType(x.state?.workspaceType??'');setGoals(x.state?.goals??[]);setNiche(x.state?.niche??'')}).catch(()=>{if(!cancelled)setError('We could not restore your onboarding progress.')})}catch{}};(async()=>{const id=localStorage.getItem('contentra_workspace')??'';if(id){void restore(id);return}try{const list=await api<Array<{role:string;workspace:{id:string}}>>('/api/v1/workspaces');if(list.length){localStorage.setItem('contentra_workspace',list[0].workspace.id);void restore(list[0].workspace.id)}else{const w=await api<{id:string}>('/api/v1/workspaces',{method:'POST',body:JSON.stringify({name:'My workspace',type:'CREATOR'})});localStorage.setItem('contentra_workspace',w.id);void restore(w.id)}}catch{if(!cancelled)setError('We could not prepare your workspace. Please try again.')}})();return ()=>{cancelled=true}},[]);const save=async(next:number,completed=false)=>{if(!workspaceId){setError('Create or select a workspace to save onboarding.');return false}try{await api(`/api/v1/workspaces/${workspaceId}/onboarding`,{method:'PUT',body:JSON.stringify({currentStep:next,workspaceType:type||undefined,goals,niche:niche||undefined,completed})},workspaceId);return true}catch{setError('Your progress could not be saved. Please try again.');return false}};const goNext=async()=>{const next=Math.min(step+1,9);if(await save(next))setStep(next)};const current=steps[step];return <div className="auth"><div className="onboard"><div className="progress"><i style={{width:`${((step+1)/steps.length)*100}%`}}/></div><Card><span className="eyebrow">Step {step+1} of {steps.length}</span><h1 style={{fontSize:30,letterSpacing:'-.04em'}}>{current[0]}</h1><p>{current[1]}</p>{error&&<p role="alert">{error}</p>}{step===0&&<div className="form"><p className="muted">Your progress saves as you continue.</p></div>}{step===1&&<div className="choice-grid">{options.map(([label,value])=><button className={`choice ${type===value?'selected':''}`} key={value} onClick={()=>setType(value)}><strong>{label}</strong></button>)}</div>}{step===2&&<label className="field"><span>What do you create or what does your business do?</span><textarea value={niche} onChange={e=>setNiche(e.target.value)} rows={5} placeholder="Describe it naturally…"/></label>}{step===3&&<div className="choice-grid">{goalOptions.map(x=><button className={`choice ${goals.includes(x)?'selected':''}`} key={x} onClick={()=>setGoals(g=>g.includes(x)?g.filter(v=>v!==x):[...g,x])}><strong>{x}</strong></button>)}</div>}{step>3&&<div className="empty"><h3>{step===9?'Create is ready for your first idea':'Continue building your workspace context'}</h3><p>Connections, analysis, and opportunities appear only when their configured backend sources are available.</p></div>}<div style={{display:'flex',justifyContent:'space-between',marginTop:28}}>{step>0?<Button variant="secondary" onClick={()=>{const previous=step-1;void save(previous).then(ok=>ok&&setStep(previous))}}>Back</Button>:<span/>}<Button href={step===9?'/creatos':undefined} onClick={step===9?()=>void save(9,true):()=>void goNext()} disabled={!workspaceId}>{step===9?'Open Creatos':'Continue'}</Button></div></Card></div></div>}
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { Button, Card } from "@/components/ui";
+import { api, ApiClientError } from "@/lib/api";
+
+type WorkspaceType =
+  | "CREATOR"
+  | "PERSONAL_BRAND"
+  | "BUSINESS"
+  | "AGENCY";
+
+type OnboardingState = {
+  currentStep?: number;
+  workspaceType?: WorkspaceType;
+  website?: string;
+  niche?: string;
+  audience?: string;
+  goals?: string[];
+  platforms?: string[];
+  tone?: string;
+  completed?: boolean;
+};
+
+type WorkspaceMembership = {
+  role: string;
+  workspace: {
+    id: string;
+    name: string;
+    type: WorkspaceType;
+  };
+};
+
+const steps = [
+  {
+    title: "Welcome",
+    description:
+      "Set up the context that makes Contentra useful from day one.",
+  },
+  {
+    title: "What are you building?",
+    description:
+      "Tell us what you're building so Contentra can tailor your workspace.",
+  },
+  {
+    title: "Your website",
+    description:
+      "Give Contentra your website so it can understand your business.",
+  },
+  {
+    title: "Your niche",
+    description:
+      "Tell Contentra what you create or what your business does.",
+  },
+  {
+    title: "Your audience",
+    description:
+      "Describe the people you want to reach.",
+  },
+  {
+    title: "Your goals",
+    description:
+      "Choose the outcomes you want Contentra to help you achieve.",
+  },
+  {
+    title: "Your platforms",
+    description:
+      "Choose where you want to grow.",
+  },
+  {
+    title: "Your brand",
+    description:
+      "Give Contentra a sense of how you want your content to feel.",
+  },
+  {
+    title: "Connect your accounts",
+    description:
+      "Connect your social accounts or skip this step for now.",
+  },
+  {
+    title: "You're ready",
+    description:
+      "Your Contentra workspace has the context it needs to get started.",
+  },
+] as const;
+
+const workspaceOptions: Array<{
+  label: string;
+  value: WorkspaceType;
+  description: string;
+}> = [
+  {
+    label: "Creator",
+    value: "CREATOR",
+    description: "I create content around myself or my work.",
+  },
+  {
+    label: "Personal Brand",
+    value: "PERSONAL_BRAND",
+    description: "I'm building an audience around my personal brand.",
+  },
+  {
+    label: "Business",
+    value: "BUSINESS",
+    description: "I'm growing a company, product, or service.",
+  },
+  {
+    label: "Agency",
+    value: "AGENCY",
+    description: "I manage growth and content for clients.",
+  },
+];
+
+const goalOptions = [
+  "Grow my audience",
+  "Increase engagement",
+  "Generate leads",
+  "Drive sales",
+  "Build authority",
+  "Stay consistent",
+  "Understand what content works",
+];
+
+const platformOptions = [
+  "Instagram",
+  "TikTok",
+  "YouTube",
+  "X",
+];
+
+export default function Onboarding() {
+  const [step, setStep] = useState(0);
+  const [workspaceId, setWorkspaceId] = useState("");
+  const [workspaceType, setWorkspaceType] =
+    useState<WorkspaceType>("CREATOR");
+  const [website, setWebsite] = useState("");
+  const [niche, setNiche] = useState("");
+  const [audience, setAudience] = useState("");
+  const [goals, setGoals] = useState<string[]>([]);
+  const [platforms, setPlatforms] = useState<string[]>([]);
+  const [tone, setTone] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const current = steps[step];
+
+  const progress = useMemo(
+    () => ((step + 1) / steps.length) * 100,
+    [step],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const restore = async (id: string) => {
+      try {
+        const state = await api<OnboardingState>(
+          `/api/v1/workspaces/${id}/onboarding`,
+          {},
+          id,
+        );
+
+        if (cancelled) return;
+
+        setWorkspaceId(id);
+        setStep(Math.min(state.currentStep ?? 0, steps.length - 1));
+        setWorkspaceType(state.workspaceType ?? "CREATOR");
+        setWebsite(state.website ?? "");
+        setNiche(state.niche ?? "");
+        setAudience(state.audience ?? "");
+        setGoals(state.goals ?? []);
+        setPlatforms(state.platforms ?? []);
+        setTone(state.tone ?? "");
+        setError("");
+      } catch (requestError) {
+        if (cancelled) return;
+
+        localStorage.removeItem("contentra_workspace");
+
+        if (requestError instanceof ApiClientError) {
+          setError(requestError.message);
+        } else {
+          setError(
+            "We could not load your onboarding. Please try again.",
+          );
+        }
+
+        setWorkspaceId("");
+      }
+    };
+
+    const prepare = async () => {
+      try {
+        const memberships = await api<WorkspaceMembership[]>(
+          "/api/v1/workspaces",
+        );
+
+        if (cancelled) return;
+
+        if (!memberships.length) {
+          setError(
+            "Your Contentra workspace could not be found. Please sign in again.",
+          );
+          setLoading(false);
+          return;
+        }
+
+        const storedId =
+          localStorage.getItem("contentra_workspace") ?? "";
+
+        const storedMembership = memberships.find(
+          (membership) => membership.workspace.id === storedId,
+        );
+
+        const membership =
+          storedMembership ?? memberships[0];
+
+        const id = membership.workspace.id;
+
+        localStorage.setItem("contentra_workspace", id);
+
+        await restore(id);
+      } catch (requestError) {
+        if (cancelled) return;
+
+        if (requestError instanceof ApiClientError) {
+          setError(requestError.message);
+        } else {
+          setError(
+            "We could not prepare your workspace. Please sign in again.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void prepare();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const save = async (
+    nextStep: number,
+    completed = false,
+  ) => {
+    if (!workspaceId) {
+      setError(
+        "Your workspace is still loading. Please try again.",
+      );
+      return false;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      await api(
+        `/api/v1/workspaces/${workspaceId}/onboarding`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            currentStep: nextStep,
+            workspaceType,
+            website: website || undefined,
+            niche: niche || undefined,
+            audience: audience || undefined,
+            goals,
+            platforms,
+            tone: tone || undefined,
+            completed,
+          }),
+        },
+        workspaceId,
+      );
+
+      return true;
+    } catch (requestError) {
+      if (requestError instanceof ApiClientError) {
+        setError(requestError.message);
+      } else {
+        setError(
+          "Your progress could not be saved. Please try again.",
+        );
+      }
+
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const next = async () => {
+    const nextStep = Math.min(
+      step + 1,
+      steps.length - 1,
+    );
+
+    const saved = await save(
+      nextStep,
+      nextStep === steps.length - 1,
+    );
+
+    if (saved) {
+      setStep(nextStep);
+    }
+  };
+
+  const back = async () => {
+    if (step === 0) return;
+
+    const previousStep = step - 1;
+
+    const saved = await save(previousStep);
+
+    if (saved) {
+      setStep(previousStep);
+    }
+  };
+
+  const toggleGoal = (goal: string) => {
+    setGoals((currentGoals) =>
+      currentGoals.includes(goal)
+        ? currentGoals.filter((item) => item !== goal)
+        : [...currentGoals, goal],
+    );
+  };
+
+  const togglePlatform = (platform: string) => {
+    setPlatforms((currentPlatforms) =>
+      currentPlatforms.includes(platform)
+        ? currentPlatforms.filter(
+            (item) => item !== platform,
+          )
+        : [...currentPlatforms, platform],
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="auth">
+        <div className="onboard">
+          <Card>
+            <p className="muted">
+              Preparing your Contentra workspace...
+            </p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="auth">
+      <div className="onboard">
+        <div className="progress">
+          <i style={{ width: `${progress}%` }} />
+        </div>
+
+        <Card>
+          <span className="eyebrow">
+            Step {step + 1} of {steps.length}
+          </span>
+
+          <h1
+            style={{
+              fontSize: 30,
+              letterSpacing: "-.04em",
+            }}
+          >
+            {current.title}
+          </h1>
+
+          <p>{current.description}</p>
+
+          {error && (
+            <p
+              role="alert"
+              style={{
+                marginTop: 12,
+              }}
+            >
+              {error}
+            </p>
+          )}
+
+          {step === 0 && (
+            <div className="form">
+              <p className="muted">
+                Contentra uses your business context, audience,
+                goals, platforms, and brand direction to
+                personalize your workspace.
+              </p>
+            </div>
+          )}
+
+          {step === 1 && (
+            <div className="choice-grid">
+              {workspaceOptions.map((option) => (
+                <button
+                  type="button"
+                  className={`choice ${
+                    workspaceType === option.value
+                      ? "selected"
+                      : ""
+                  }`}
+                  key={option.value}
+                  onClick={() =>
+                    setWorkspaceType(option.value)
+                  }
+                >
+                  <strong>{option.label}</strong>
+                  <span>{option.description}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {step === 2 && (
+            <label className="field">
+              <span>Website</span>
+
+              <input
+                value={website}
+                onChange={(event) =>
+                  setWebsite(event.target.value)
+                }
+                placeholder="https://yourwebsite.com"
+                type="url"
+              />
+
+              <small>
+                Contentra can use your website to understand
+                what you do, who you serve, and how your brand
+                is positioned.
+              </small>
+            </label>
+          )}
+
+          {step === 3 && (
+            <label className="field">
+              <span>
+                What do you create or what does your business
+                do?
+              </span>
+
+              <textarea
+                value={niche}
+                onChange={(event) =>
+                  setNiche(event.target.value)
+                }
+                rows={5}
+                placeholder="Tell us about your niche, product, service, or content..."
+              />
+            </label>
+          )}
+
+          {step === 4 && (
+            <label className="field">
+              <span>
+                Who are you trying to reach?
+              </span>
+
+              <textarea
+                value={audience}
+                onChange={(event) =>
+                  setAudience(event.target.value)
+                }
+                rows={5}
+                placeholder="Describe your ideal audience..."
+              />
+            </label>
+          )}
+
+          {step === 5 && (
+            <div className="choice-grid">
+              {goalOptions.map((goal) => (
+                <button
+                  type="button"
+                  className={`choice ${
+                    goals.includes(goal)
+                      ? "selected"
+                      : ""
+                  }`}
+                  key={goal}
+                  onClick={() => toggleGoal(goal)}
+                >
+                  <strong>{goal}</strong>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="choice-grid">
+              {platformOptions.map((platform) => (
+                <button
+                  type="button"
+                  className={`choice ${
+                    platforms.includes(platform)
+                      ? "selected"
+                      : ""
+                  }`}
+                  key={platform}
+                  onClick={() =>
+                    togglePlatform(platform)
+                  }
+                >
+                  <strong>{platform}</strong>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {step === 7 && (
+            <label className="field">
+              <span>
+                How should your content feel?
+              </span>
+
+              <textarea
+                value={tone}
+                onChange={(event) =>
+                  setTone(event.target.value)
+                }
+                rows={5}
+                placeholder="For example: direct, educational, confident, funny, minimal..."
+              />
+
+              <small>
+                Describe the voice or style you want
+                Contentra to keep in mind.
+              </small>
+            </label>
+          )}
+
+          {step === 8 && (
+            <div className="form">
+              <div className="empty">
+                <h3>
+                  Connect your social accounts
+                </h3>
+
+                <p>
+                  Connect your accounts to give Contentra
+                  real performance context. You can also
+                  skip this and connect them later.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {step === 9 && (
+            <div className="form">
+              <div className="empty">
+                <h3>
+                  Your Contentra workspace is ready.
+                </h3>
+
+                <p>
+                  Contentra now has your business type,
+                  website, niche, audience, goals,
+                  platforms, and brand direction.
+                </p>
+
+                <p className="muted">
+                  You can connect more accounts and add more
+                  context from your workspace later.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+              marginTop: 28,
+            }}
+          >
+            {step > 0 ? (
+              <Button
+                variant="secondary"
+                onClick={back}
+                disabled={saving}
+              >
+                Back
+              </Button>
+            ) : (
+              <span />
+            )}
+
+            {step === 9 ? (
+              <Button
+                href="/home"
+                onClick={() => {
+                  void save(9, true);
+                }}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Open Contentra"}
+              </Button>
+            ) : (
+              <Button
+                onClick={next}
+                disabled={saving || !workspaceId}
+              >
+                {saving ? "Saving..." : "Continue"}
+              </Button>
+            )}
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
