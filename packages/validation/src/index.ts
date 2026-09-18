@@ -16,7 +16,22 @@ export const updateProfileSchema = z.object({ name: z.string().trim().max(120).n
 export const updateCampaignSchema = z.object({ name: z.string().trim().min(1).max(120).optional(), description: z.string().max(5000).optional(), goal: z.string().max(200).optional(), status: z.enum(['DRAFT','ACTIVE','PAUSED','COMPLETED','ARCHIVED']).optional(), platforms: z.array(z.string().trim().min(1).max(40)).max(20).optional() });
 export const createCalendarItemSchema = z.object({ contentId: idSchema.optional(), campaignId: idSchema.optional(), platform: z.string().max(50).optional(), scheduledFor: z.coerce.date(), status: z.string().min(1).max(30).default('SCHEDULED') });
 export const updateContentSchema = createContentSchema.partial().extend({ status: z.enum(['IDEA','DRAFT','READY','SCHEDULED','PUBLISHED','FAILED','ARCHIVED']).optional(), scheduledAt: z.coerce.date().nullable().optional(), campaignId: idSchema.nullable().optional() });
-export const onboardingStateSchema = z.object({ currentStep: z.number().int().min(0).max(9), workspaceType: workspaceTypeSchema.optional(), niche: z.string().trim().max(2000).optional(), goals: z.array(z.string().trim().min(1).max(120)).max(20).optional(), connections: z.array(z.string().trim().min(1).max(80)).max(20).optional(), importChoices: z.array(z.string().trim().min(1).max(80)).max(20).optional(), contentPreferences: z.record(z.unknown()).optional(), firstOpportunityId: idSchema.optional(), firstContentId: idSchema.optional(), completed: z.boolean().optional() });
+export const onboardingStateSchema = z.object({
+  currentStep: z.number().int().min(0).max(9),
+  workspaceType: workspaceTypeSchema.optional(),
+  website: z.string().trim().url().max(2048).optional(),
+  niche: z.string().trim().max(2000).optional(),
+  audience: z.string().trim().max(2000).optional(),
+  goals: z.array(z.string().trim().min(1).max(120)).max(20).optional(),
+  platforms: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
+  tone: z.string().trim().max(1000).optional(),
+  connections: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
+  importChoices: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
+  contentPreferences: z.record(z.unknown()).optional(),
+  firstOpportunityId: idSchema.optional(),
+  firstContentId: idSchema.optional(),
+  completed: z.boolean().optional(),
+});
 
 export const referralClaimSchema = z.object({ code: z.string().trim().min(1).max(32).toUpperCase(), workspaceId: idSchema });
 export const referralCodeCreateSchema = z.object({ code: z.string().trim().min(1).max(32).toUpperCase().optional() });
