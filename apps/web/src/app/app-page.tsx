@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, BarChart3, CalendarDays, CheckCircle2, ChevronRight, CirclePlay, Lightbulb, Sparkles, TrendingUp } from 'lucide-react';
 import { AppShell } from '@/components/app-shell';
 import { Button, Card, EmptyState, Metric, PageHeader, Badge, Skeleton } from '@/components/ui';
 import { api, ApiClientError } from '@/lib/api';
@@ -12,23 +11,41 @@ function useWorkspace(){const [id,setId]=useState('');useEffect(()=>setId(localS
 function fmt(n:number|undefined|null){return n==null?'—':new Intl.NumberFormat().format(n)}
 
 export function Home(){
- const workspaceId=useWorkspace(); const [data,setData]=useState<HomeData|null>(null); const [error,setError]=useState('');
- const load=()=>{if(!workspaceId)return;setData(null);setError('');api<HomeData>(`/api/v1/workspaces/${workspaceId}/home`,{},workspaceId).then(setData).catch(e=>setError(e instanceof ApiClientError?e.message:'Your dashboard could not be loaded.'))}; useEffect(load,[workspaceId]);
- const latest=data?.metrics?.[0]; const first=data?.opportunities?.[0]; const completed=data?.recentContent?.filter(x=>x.status==='PUBLISHED').length??0;
- return <AppShell active="Home"><div className="home-page">
-  <PageHeader eyebrow="Workspace overview" title="Good to see you." description="Here’s what needs your attention across your business and content." action={<div className="home-header-actions"><Button variant="secondary" href="/creatos"><Sparkles size={15}/> Find an opportunity</Button><Button href="/app/create">Create content</Button></div>}/>
-  {error?<EmptyState title="We couldn't load your workspace" description={error} action={<Button onClick={load}>Retry</Button}/>:
-   data===null?<div className="home-loading-grid">{[1,2,3,4,5,6].map(x=><Skeleton key={x} className="skeleton-block"/>)}</div>:
-   <>
-    <section className="home-command-card"><div className="command-content"><span className="home-kicker"><Sparkles size={12}/> NEXT BEST ACTION</span><h2>{data.nba?.title??'Build your first content signal.'}</h2><p>{data.nba?.reason??'Complete your workspace context and Contentra will start surfacing personalized actions.'}</p><div className="command-meta"><span><CheckCircle2 size={13}/> Based on your workspace</span><span><TrendingUp size={13}/> Actionable recommendation</span></div></div><Button href={data.nba?'/creatos':'/app/create'}>{data.nba?'Take action':'Get started'} <ArrowUpRight size={15}/></Button></section>
-    <section className="home-metric-grid"><div className="home-metric-card featured"><div className="metric-icon"><TrendingUp size={16}/></div><span>Reach</span><strong>{fmt(latest?.reach)}</strong><small>Latest connected data</small></div><div className="home-metric-card"><div className="metric-icon"><BarChart3 size={16}/></div><span>Views</span><strong>{fmt(latest?.views)}</strong><small>Latest connected data</small></div><div className="home-metric-card"><div className="metric-icon"><CirclePlay size={16}/></div><span>Published</span><strong>{completed}</strong><small>Recent workspace activity</small></div><div className="home-metric-card"><div className="metric-icon"><TrendingUp size={16}/></div><span>Engagement</span><strong>{latest?.engagementRate==null?'—':`${(latest.engagementRate*100).toFixed(1)}%`}</strong><small>Latest connected data</small></div></section>
-    <div className="home-section-head"><div><span className="home-kicker muted-kicker">CONTENT INTELLIGENCE</span><h2>What deserves your attention</h2></div><a className="text-btn" href="/creatos">View all <ChevronRight size={14}/></a></div>
-    <section className="home-intelligence-grid"><Card className="home-opportunity-panel"><div className="panel-label"><Lightbulb size={14}/> Top opportunity</div>{first?<><h3>{first.title}</h3><p>{first.description}</p>{first.whyItMatters&&<div className="home-why"><span>WHY IT MATTERS</span><p>{first.whyItMatters}</p></div>}<div className="home-panel-actions"><Button href={`/app/create/custom?opportunity=${first.id}`}>Create from this</Button><Button variant="secondary" href="/creatos">See more</Button></div></>:<EmptyState title="No opportunities yet" description="Contentra will surface opportunities as it learns from your workspace."/>}</Card>
-     <Card className="home-insights-panel"><div className="panel-label"><BarChart3 size={14}/> Performance signals</div>{data.recommendations.length?data.recommendations.slice(0,4).map(r=><div className="home-insight" key={r.id}><span className="priority">{r.priority}</span><div><strong>{r.title}</strong><p>{r.reason}</p></div><ChevronRight size={14}/></div>):<EmptyState title="Insights are building" description="Connect more data to unlock recommendations."/>}</Card></section>
-    <div className="home-section-head compact"><div><span className="home-kicker muted-kicker">EXECUTION</span><h2>Keep moving</h2></div></div>
-    <section className="home-execution-grid"><Card className="home-content-panel"><div className="panel-head"><div><h3>Recent content</h3><p>What you've been working on</p></div><a className="text-btn" href="/app/content">View library <ChevronRight size={13}/></a></div>{data.recentContent.length?data.recentContent.slice(0,5).map(x=><div className="home-content-row" key={x.id}><div className="home-content-thumb">{x.format.slice(0,1).toUpperCase()}</div><div><strong>{x.title??'Untitled content'}</strong><span>{x.platform} · {x.format}</span></div><Badge>{x.status}</Badge></div>):<EmptyState title="Your workspace is ready" description="Start with an opportunity or create content from scratch." action={<Button href="/app/create">Create content</Button>}/>}</Card>
-     <Card className="home-calendar-panel"><div className="panel-head"><div><h3>Upcoming</h3><p>Your publishing queue</p></div><a className="text-btn" href="/app/calendar">Calendar <ChevronRight size={13}/></a></div>{data.upcomingCalendar.length?data.upcomingCalendar.slice(0,4).map(x=><div className="home-schedule-row" key={x.id}><div className="date-box"><b>{new Date(x.scheduledFor).getDate()}</b><span>{new Date(x.scheduledFor).toLocaleDateString(undefined,{month:'short'})}</span></div><div><strong>{x.content?.title??'Scheduled content'}</strong><span>{x.platform??x.content?.platform??'Platform'} · {new Date(x.scheduledFor).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span></div><Badge>{x.status}</Badge></div>):<EmptyState title="Nothing scheduled" description="Build your publishing queue from Calendar." action={<Button variant="secondary" href="/app/calendar"><CalendarDays size={14}/> Open calendar</Button>}/>}</Card></section>
+ const workspaceId=useWorkspace();
+ const [data,setData]=useState<HomeData|null>(null);
+ const [error,setError]=useState('');
+ const load=()=>{if(!workspaceId)return;setData(null);setError('');api<HomeData>(`/api/v1/workspaces/${workspaceId}/home`,{},workspaceId).then(setData).catch(e=>setError(e instanceof ApiClientError?e.message:'Your brief could not be loaded.'))};
+ useEffect(load,[workspaceId]);
+ return <AppShell active="Home"><PageHeader title="Good to see you." description="Here's what matters today." action={<Button href="/app/create">Create content</Button>}/>
+  {error?<EmptyState title="We couldn't load your brief" description={error} action={<Button onClick={load}>Retry</Button>}/>
+   :data===null?<><Card><Skeleton className="skeleton-block"/></Card><div className="section grid grid-4"><Skeleton className="skeleton-block"/><Skeleton className="skeleton-block"/><Skeleton className="skeleton-block"/><Skeleton className="skeleton-block"/></div></>
+   :<>
+    <Card className="ambient"><span className="eyebrow">Daily brief</span>{data.nba?<><h2 style={{margin:'10px 0 7px',fontSize:20}}>{data.nba.title}</h2><p>{data.nba.reason}</p><div className="card-actions"><Button href="/app/create">Act on it</Button></div></>:<><h2 style={{margin:'10px 0 7px',fontSize:20}}>Your brief is building.</h2><p>As Contentra gathers context from your workspace and connected data, this space will explain what matters and why.</p></>}</Card>
+    <div className="section grid grid-4">
+     <Card className="metric-card"><Metric label="Views" value={fmt(data.metrics?.[0]?.views)} detail="Latest normalized metric"/></Card>
+     <Card className="metric-card"><Metric label="Reach" value={fmt(data.metrics?.[0]?.reach)} detail="Latest normalized metric"/></Card>
+     <Card className="metric-card"><Metric label="Followers" value={fmt(data.metrics?.[0]?.followers)} detail="Latest normalized metric"/></Card>
+     <Card className="metric-card"><Metric label="Engagement" value={data.metrics?.[0]?.engagementRate==null?'—':`${(data.metrics[0].engagementRate*100).toFixed(1)}%`} detail="Latest normalized metric"/></Card>
+    </div>
+    {data.nba&&<div className="section"><Card className="opportunity"><div className="card-top"><Badge>{data.nba.type}</Badge><span className="muted">Next best action</span></div><h3>{data.nba.title}</h3><p>{data.nba.reason}</p><div className="card-actions"><Button href="/app/create">Create</Button></div></Card></div>}
+    <div className="section grid grid-2">
+     <div><div className="section-title"><h2>Opportunities</h2></div>
+      {data.opportunities.length?data.opportunities.slice(0,3).map(o=><Card key={o.id} className="opportunity" style={{marginBottom:14}}><Badge>Opportunity</Badge><h3>{o.title}</h3><p>{o.whyItMatters??o.description}</p><div className="card-actions"><Button href={`/app/create?opportunity=${o.id}`}>Create</Button></div></Card>):<EmptyState title="No opportunities yet" description="Contentra will show opportunities after enough context is available."/>}
+     </div>
+     <div><div className="section-title"><h2>What matters</h2><a href="/app/analytics" className="text-btn">View analytics</a></div>
+      {data.recommendations.length?data.recommendations.slice(0,4).map(r=><Card key={r.id} style={{marginBottom:14}}><span className="muted">Priority {r.priority}</span><h3 style={{marginTop:4}}>{r.title}</h3><p>{r.reason}</p></Card>):<EmptyState title="No insights yet" description="Recommendations will appear once there is enough normalized history to explain performance."/>}
+     </div>
+    </div>
+    <div className="section grid grid-2">
+     <div><div className="section-title"><h2>Recent content</h2><a className="text-btn" href="/app/content">View all</a></div>
+      {data.recentContent.length?data.recentContent.slice(0,5).map(c=><Card key={c.id} style={{marginBottom:14}}><Badge>{c.status}</Badge><h3>{c.title??'Untitled content'}</h3><p>{c.platform} · {c.format}</p><div className="card-actions"><Button href={`/app/content/${c.id}`} variant="secondary">Open</Button></div></Card>):<EmptyState title="You haven't created anything yet" description="Start with a format or an opportunity." action={<Button href="/app/create">Create your first piece</Button>}/>}
+     </div>
+     <div><div className="section-title"><h2>Upcoming</h2><a className="text-btn" href="/app/calendar">View calendar</a></div>
+      {data.upcomingCalendar.length?data.upcomingCalendar.slice(0,5).map(x=><Card key={x.id} style={{marginBottom:14}}><Badge>{x.status}</Badge><h3>{x.content?.title??'Calendar item'}</h3><p>{new Date(x.scheduledFor).toLocaleString()} · {x.platform??x.content?.platform??'Platform not set'}</p></Card>):<EmptyState title="Nothing scheduled" description="Create content, then schedule it from the Calendar." action={<Button href="/app/calendar">Open calendar</Button>}/>}
+     </div>
+    </div>
    </>}
- </div></AppShell>;
+ </AppShell>;
 }
+
 export function Create(){const formats=['Slideshow','Wall of Text','Cutting Fruit','On a Walk','Netflix Documentary','Video Hook & Demo','Speaking Hook & Demo','Talking Head UGC','Green Screen Meme','Talking Head Green Screen','Product Spokesperson','Green Screen Mobile with App','Claymation','Lego','Talking Objects','Felt','Skeleton','Street Interview','Character Swap','Custom'];return <AppShell active="Create"><PageHeader title="Create new content" description="Pick a format to get started. You can switch anytime."/><Card className="ambient"><span className="eyebrow">Recommended for you</span><h2 style={{margin:'9px 0 5px'}}>Recommendation comes from Contentra intelligence</h2><p>No format is fabricated when your workspace has insufficient evidence.</p><Button href="/app/create/custom">Start creating</Button></Card><div className="section"><div className="section-title"><h2>Format library</h2><span className="muted">Reusable creation infrastructure</span></div><div className="grid grid-4">{formats.map(x=><Card className="format-card" key={x}><div><div className="format-preview">{x}</div><h3>{x}</h3><p>Reusable creation inputs with contextual intelligence.</p></div><Button href={`/app/create/${x.toLowerCase().replaceAll(' ','-')}`} variant="secondary">Start</Button></Card>)}</div></div></AppShell>}
