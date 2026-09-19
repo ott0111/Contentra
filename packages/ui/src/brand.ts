@@ -2,9 +2,9 @@
  * Contentra brand tokens — the single source of truth for the Contentra
  * visual identity across Web, Mobile, and Desktop.
  *
- * Official palette: Contentra Orange (#FF6A00) on white/light surfaces with
+ * Official palette: Contentra Orange (#C7FF00) on white/light surfaces with
  * near-black (#111111) typography, muted #6B6B6B text, and #E8E8E8 borders.
- * Orange is a strategic accent: primary CTAs, active navigation, selected
+ * Lime is a strategic accent: primary CTAs, active navigation, selected
  * states, focus rings, progress, and important metrics only.
  */
 
@@ -15,11 +15,11 @@ export const brand = {
 } as const;
 
 export const colors = {
-  primary: '#FF6A00',
-  primaryHover: '#E85F00',
-  primaryPressed: '#CC5400',
-  primarySoft: '#FFF1E6',
-  primaryBorder: '#FFD9BF',
+  primary: '#C7FF00',
+  primaryHover: '#B4EA00',
+  primaryPressed: '#9CCB00',
+  primarySoft: '#F4FFD6',
+  primaryBorder: '#DDF59A',
 
   bg: '#FAFAFA',
   surface: '#FFFFFF',
@@ -44,7 +44,7 @@ export const colors = {
   mutedOnDark: '#A6A6A6',
   borderDark: '#2E2E2E',
 
-  focusRing: 'rgba(255, 106, 0, 0.22)',
+  focusRing: 'rgba(199, 255, 0, 0.28)',
   overlay: 'rgba(17, 17, 17, 0.35)',
 } as const;
 
