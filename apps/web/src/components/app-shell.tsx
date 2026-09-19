@@ -12,4 +12,3 @@ const navGroups=[
  {label:'Plan & Grow',tier:'PRO',items:[['Calendar','/app/calendar'],['Analytics','/app/analytics']]},
  {label:'Business',tier:'BUSINESS',items:[['Business OS','/app/business/overview'],['Campaigns','/app/business/campaigns'],['Team & Workspaces','/app/settings/workspaces']]},
 ];
-}
