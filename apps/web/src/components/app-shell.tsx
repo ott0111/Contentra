@@ -112,7 +112,7 @@ export function AppShell({children,active}:{children:React.ReactNode;active:stri
     <button className="icon-btn" aria-label="Sign out" onClick={logout}><LogOut size={16}/></button>
    </div>
   </header>
-  <main className="main">
+  <main className="main"><div className="app-command-strip"><span className="app-status-dot"/>Workspace synced <span className="command-sep">·</span><button onClick={openSearch}><Search size={13}/> Quick search <kbd>⌘K</kbd></button></div>
    {loading?<div className="grid grid-2"><Skeleton className="skeleton-block"/><Skeleton className="skeleton-block"/></div>
     :authFailed?<div className="empty"><h3>You need to sign in</h3><p>Your session is no longer valid. Sign in to continue.</p><Link className="btn btn-primary" href="/login">Sign in</Link></div>
     :workspaceId?children
