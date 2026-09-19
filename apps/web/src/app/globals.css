@@ -585,3 +585,35 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 .changelog-list{max-width:860px;margin:0 auto 35px}.changelog-item{background:#fff;border:1px solid var(--border);border-radius:22px;padding:28px;box-shadow:var(--shadow-xs)}.changelog-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}.changelog-meta b{color:var(--accent);text-transform:uppercase;letter-spacing:.08em}.changelog-item h2{font-size:25px;letter-spacing:-.04em;margin:18px 0 8px}.changelog-item p{color:var(--muted);line-height:1.65;font-size:14px}.changelog-item ul{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:10px}.changelog-item li{display:flex;align-items:center;gap:8px;font-size:13px}.changelog-item li svg{color:var(--accent)}
 .brandkit-grid{max-width:980px;margin:0 auto 22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.brandkit-preview{min-height:330px;border-radius:24px;padding:32px;display:flex;flex-direction:column;justify-content:flex-end;box-shadow:var(--shadow-md)}.brandkit-preview.dark{background:#151515;color:#fff}.brandkit-preview .large{width:58px;height:58px;border-radius:18px;margin-bottom:auto}.brandkit-preview h2{font-size:34px;letter-spacing:-.05em;margin:0 0 5px}.brandkit-preview p{margin:0;color:#aaa}.brandkit-card{border:1px solid var(--border);border-radius:24px;background:#fff;padding:30px;box-shadow:var(--shadow-xs)}.brand-color{display:flex;align-items:center;gap:12px;margin:22px 0 12px}.brand-color-swatch{width:54px;height:54px;border-radius:16px;background:linear-gradient(140deg,#ff9a3d,#ff6a00,#e85f00);box-shadow:0 10px 24px rgba(255,106,0,.2)}.brand-color b{display:block;font-size:16px}.brand-color code{display:block;color:var(--muted);font-size:12px;margin-top:4px}.brandkit-card>p{color:var(--muted);font-size:13px;line-height:1.6}.brandkit-checks{display:grid;gap:9px;margin-top:20px}.brandkit-checks span{display:flex;align-items:center;gap:8px;font-size:12px}.brandkit-checks svg{color:var(--accent)}.brandkit-note{max-width:980px;margin:0 auto 28px;padding:15px 17px;border:1px dashed #ffd0b2;border-radius:14px;background:var(--accent-2);color:var(--accent-ink);display:flex;gap:9px;align-items:center;font-size:12px}.marketing-page-back{max-width:980px;margin:0 auto 70px}.marketing-page-back a{display:inline-flex;align-items:center;gap:7px;color:var(--accent-ink);font-size:12px;font-weight:700;text-decoration:none}
 @media(max-width:800px){.marketing-nav{grid-template-columns:1fr auto;gap:10px}.marketing-links{grid-column:1/-1;grid-row:2;width:max-content;max-width:100%;overflow:auto;justify-self:center}.marketing-actions{justify-self:end}.discover-feature-grid,.resource-grid,.brandkit-grid{grid-template-columns:1fr}.how-step{grid-template-columns:42px 42px 1fr;gap:12px;padding:20px}.how-step-icon{width:42px;height:42px}}
+
+
+/* Application shell: dashboard-style rail + workspace header */
+@media(min-width:901px){
+  .app-shell{background:#f8f8f8}
+  .app-shell .topbar{position:fixed;inset:0 auto 0 0;width:232px;height:100vh;display:flex;flex-direction:column;align-items:stretch;padding:20px 14px;border-right:1px solid #e6e6e6;border-bottom:0;background:#fff;backdrop-filter:none;z-index:40}
+  .app-shell .top-left{display:block}
+  .app-shell .top-left .brand{padding:7px 10px 22px;font-size:15px}
+  .app-shell .workspace-wrap{width:100%;padding:0 2px 16px;border-bottom:1px solid #eee}
+  .app-shell .workspace{width:100%;max-width:none;justify-content:space-between;background:#fafafa}
+  .app-shell .nav-pill{justify-self:initial;display:flex!important;flex-direction:column;align-items:stretch;gap:2px;border:0;background:transparent;padding:14px 0 0;border-radius:0;overflow:auto;flex:1}
+  .app-shell .nav-pill>a{padding:10px 11px;border-radius:10px;font-size:12px;color:#777}
+  .app-shell .nav-pill>a.active{background:#fff1e6;color:#c24b00}
+  .app-shell .nav-pill>a:hover{background:#f6f6f6}
+  .app-shell .nav-group{position:relative}
+  .app-shell .nav-group-trigger{width:100%;border:0;background:transparent;display:flex;align-items:center;gap:7px;text-align:left;padding:13px 11px 7px;color:#9a9a9a;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+  .app-shell .nav-group-trigger svg{display:none}
+  .app-shell .nav-group-trigger small{margin-left:auto;font-size:7px;color:#c24b00;letter-spacing:.04em}
+  .app-shell .nav-group-menu{display:grid;position:static;min-width:0;padding:0 0 7px;border:0;box-shadow:none;background:transparent}
+  .app-shell .nav-group-menu a{padding:9px 11px 9px 20px;border-radius:9px;color:#777;font-size:11px;text-decoration:none}
+  .app-shell .nav-group-menu a:hover{background:#f6f6f6;color:#222}
+  .app-shell .top-actions{justify-content:stretch;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-top:1px solid #eee;padding-top:12px}
+  .app-shell .top-actions .search-btn{grid-column:1/-1;justify-content:flex-start}
+  .app-shell .top-actions .icon-btn{justify-content:center}
+  .app-shell .mobile-menu-btn{display:none}
+  .app-shell .main{max-width:none;margin-left:232px;padding:34px 42px 90px}
+  .app-shell .app-command-strip{max-width:1220px;margin:0 auto 18px}
+}
+.dashboard-table{width:100%;border-collapse:collapse;font-size:12px}.dashboard-table th{text-align:left;color:#999;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:10px 12px;border-bottom:1px solid #eee}.dashboard-table td{padding:13px 12px;border-bottom:1px solid #f0f0f0}.dashboard-table tr:hover td{background:#fafafa}
+.salesops-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.salesops-metric{background:#fff;border:1px solid #e6e6e6;border-radius:15px;padding:19px}.salesops-metric span{display:block;color:#777;font-size:11px}.salesops-metric strong{display:block;font-size:28px;letter-spacing:-.05em;margin:8px 0 3px}.salesops-metric small{color:#4f8d62;font-size:10px}
+@media(max-width:900px){.app-shell .nav-pill.mobile-open{display:flex!important}.app-shell .nav-group-menu{display:none}.app-shell .nav-group-trigger svg{display:block}.salesops-metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.app-shell .main{padding:24px 16px 80px}.salesops-metric-grid{grid-template-columns:1fr}}
