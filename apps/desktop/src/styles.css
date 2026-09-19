@@ -20,3 +20,11 @@ aside button.selected::before{content:'';position:absolute;left:0;top:26%;bottom
 @keyframes fab-in{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(hover:hover){.cards .panel:hover{transform:translateY(-2px);border-color:var(--border-strong);box-shadow:var(--declaration-hover-shadow)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* Unified Contentra product layer */
+:root{--surface-2:#fbfbfa;--accent-soft:#fff0e6;--shadow-sm:0 5px 18px rgba(15,15,15,.045);--shadow-md:0 18px 50px rgba(15,15,15,.08)}
+main{max-width:1320px;padding:34px 40px 90px}.panel{border-radius:20px;border-color:var(--border);box-shadow:0 1px 2px rgba(17,17,17,.03),0 6px 20px rgba(17,17,17,.035);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.panel:hover{border-color:var(--border-strong);box-shadow:var(--shadow-sm)}
+h1{font-size:38px;font-weight:800;letter-spacing:-.05em}h2{font-weight:750;letter-spacing:-.025em}.cards{gap:14px}.actions{gap:8px}
+button{border-radius:11px;padding:10px 15px;box-shadow:none}button:not(:disabled):active{transform:scale(.98)}.quiet{background:#fff}.business-tabs{background:#fff;border:1px solid var(--border);border-radius:13px;padding:4px;width:max-content}.business-tabs button{border:0;border-radius:9px}.business-tabs button.selected{background:var(--accent)}
+input,textarea,select{border-radius:12px;background:#fff}textarea{line-height:1.55}.create{border-radius:20px}.release-notice{border-radius:14px}
+aside{padding:24px 14px}aside button{padding:10px 12px}aside button.selected{background:rgba(255,106,0,.16)}
+@media(max-width:750px){main{padding:24px 18px 70px}h1{font-size:31px}}
