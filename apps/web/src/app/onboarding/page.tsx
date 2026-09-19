@@ -346,283 +346,55 @@ export default function Onboarding() {
   };
 
   if (loading) {
-    return (
-      <div className="auth">
-        <div className="onboard">
-          <Card>
-            <p className="muted">
-              Preparing your Contentra workspace...
-            </p>
-          </Card>
-        </div>
-      </div>
-    );
+    return <div className="onboarding-v2"><div className="onboarding-loading"><span className="onboarding-orb" /><p>Preparing your workspace...</p></div></div>;
   }
 
   return (
-    <div className="auth">
-      <div className="onboard">
-        <div className="progress">
-          <i style={{ width: `${progress}%` }} />
-        </div>
-
-        <Card>
-          <span className="eyebrow">
-            Step {step + 1} of {steps.length}
-          </span>
-
-          <h1
-            style={{
-              fontSize: 30,
-              letterSpacing: "-.04em",
-            }}
-          >
-            {current.title}
-          </h1>
-
-          <p>{current.description}</p>
-
-          {error && (
-            <p
-              role="alert"
-              style={{
-                marginTop: 12,
-              }}
-            >
-              {error}
-            </p>
-          )}
-
-          {step === 0 && (
-            <div className="form">
-              <p className="muted">
-                Contentra uses your business context, audience,
-                goals, platforms, and brand direction to
-                personalize your workspace.
-              </p>
-            </div>
-          )}
-
-          {step === 1 && (
-            <div className="choice-grid">
-              {workspaceOptions.map((option) => (
-                <button
-                  type="button"
-                  className={`choice ${
-                    workspaceType === option.value
-                      ? "selected"
-                      : ""
-                  }`}
-                  key={option.value}
-                  onClick={() =>
-                    setWorkspaceType(option.value)
-                  }
-                >
-                  <strong>{option.label}</strong>
-                  <span>{option.description}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {step === 2 && (
-            <label className="field">
-              <span>Website</span>
-
-              <input
-                value={website}
-                onChange={(event) =>
-                  setWebsite(event.target.value)
-                }
-                placeholder="https://yourwebsite.com"
-                type="url"
-              />
-
-              <small>
-                Contentra can use your website to understand
-                what you do, who you serve, and how your brand
-                is positioned.
-              </small>
-            </label>
-          )}
-
-          {step === 3 && (
-            <label className="field">
-              <span>
-                What do you create or what does your business
-                do?
-              </span>
-
-              <textarea
-                value={niche}
-                onChange={(event) =>
-                  setNiche(event.target.value)
-                }
-                rows={5}
-                placeholder="Tell us about your niche, product, service, or content..."
-              />
-            </label>
-          )}
-
-          {step === 4 && (
-            <label className="field">
-              <span>
-                Who are you trying to reach?
-              </span>
-
-              <textarea
-                value={audience}
-                onChange={(event) =>
-                  setAudience(event.target.value)
-                }
-                rows={5}
-                placeholder="Describe your ideal audience..."
-              />
-            </label>
-          )}
-
-          {step === 5 && (
-            <div className="choice-grid">
-              {goalOptions.map((goal) => (
-                <button
-                  type="button"
-                  className={`choice ${
-                    goals.includes(goal)
-                      ? "selected"
-                      : ""
-                  }`}
-                  key={goal}
-                  onClick={() => toggleGoal(goal)}
-                >
-                  <strong>{goal}</strong>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {step === 6 && (
-            <div className="choice-grid">
-              {platformOptions.map((platform) => (
-                <button
-                  type="button"
-                  className={`choice ${
-                    platforms.includes(platform)
-                      ? "selected"
-                      : ""
-                  }`}
-                  key={platform}
-                  onClick={() =>
-                    togglePlatform(platform)
-                  }
-                >
-                  <strong>{platform}</strong>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {step === 7 && (
-            <label className="field">
-              <span>
-                How should your content feel?
-              </span>
-
-              <textarea
-                value={tone}
-                onChange={(event) =>
-                  setTone(event.target.value)
-                }
-                rows={5}
-                placeholder="For example: direct, educational, confident, funny, minimal..."
-              />
-
-              <small>
-                Describe the voice or style you want
-                Contentra to keep in mind.
-              </small>
-            </label>
-          )}
-
-          {step === 8 && (
-            <div className="form">
-              <div className="empty">
-                <h3>
-                  Connect your social accounts
-                </h3>
-
-                <p>
-                  Connect your accounts to give Contentra
-                  real performance context. You can also
-                  skip this and connect them later.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {step === 9 && (
-            <div className="form">
-              <div className="empty">
-                <h3>
-                  Your Contentra workspace is ready.
-                </h3>
-
-                <p>
-                  Contentra now has your business type,
-                  website, niche, audience, goals,
-                  platforms, and brand direction.
-                </p>
-
-                <p className="muted">
-                  You can connect more accounts and add more
-                  context from your workspace later.
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 12,
-              marginTop: 28,
-            }}
-          >
-            {step > 0 ? (
-              <Button
-                variant="secondary"
-                onClick={back}
-                disabled={saving}
-              >
-                Back
-              </Button>
-            ) : (
-              <span />
-            )}
-
-            {step === 9 ? (
-              <Button
-                onClick={async () => {
-                  const saved = await save(9, true);
-
-                  if (saved) {
-                    window.location.assign("/home");
-                  }
-                }}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Open Contentra"}
-              </Button>
-            ) : (
-              <Button
-                onClick={next}
-                disabled={saving || !workspaceId}
-              >
-                {saving ? "Saving..." : "Continue"}
-              </Button>
-            )}
+    <div className="onboarding-v2">
+      <header className="onboarding-top">
+        <div className="onboarding-brand"><span className="brand-mark" aria-hidden="true" /> <strong>Contentra</strong></div>
+        <div className="onboarding-progress-label"><span>{step + 1}</span> / {steps.length}</div>
+      </header>
+      <div className="onboarding-layout">
+        <aside className="onboarding-sidebar">
+          <div>
+            <span className="section-label">Workspace setup</span>
+            <h1>Build your<br /><span>Contentra brain.</span></h1>
+            <p>Give Contentra the context it needs to make the product feel built around you.</p>
           </div>
-        </Card>
+          <div className="onboarding-step-list">
+            {steps.map((item, index) => <div key={item.title} className={'onboarding-step-item ' + (index === step ? 'active ' : '') + (index < step ? 'done' : '')}><span>{index < step ? '✓' : String(index + 1).padStart(2, '0')}</span><div><b>{item.title}</b>{index === step && <small>{item.description}</small>}</div></div>)}
+          </div>
+          <div className="onboarding-sidebar-foot"><span className="onboarding-dot" /> Your progress saves automatically</div>
+        </aside>
+        <main className="onboarding-main">
+          <div className="onboarding-main-inner">
+            <div className="onboarding-main-head"><span className="section-label">Step {step + 1}</span><div className="onboarding-progress-track"><i style={{ width: `${progress}%` }} /></div></div>
+            <div className="onboarding-content-card">
+              <div className="onboarding-copy"><h2>{current.title}</h2><p>{current.description}</p></div>
+              {error && <div className="onboarding-error" role="alert">{error}</div>}
+
+              {step === 0 && <div className="onboarding-welcome-grid"><div className="welcome-panel"><span className="welcome-icon">✦</span><h3>Make Contentra yours.</h3><p>We will use your answers to personalize ideas, recommendations, creation, analytics, and your next best action.</p></div><div className="welcome-list"><div><b>01</b><span>Understand your business</span></div><div><b>02</b><span>Build your content context</span></div><div><b>03</b><span>Turn signals into action</span></div></div></div>}
+
+              {step === 1 && <div className="onboarding-choice-grid">{workspaceOptions.map((option) => <button type="button" className={'onboarding-choice ' + (workspaceType === option.value ? 'selected' : '')} key={option.value} onClick={() => setWorkspaceType(option.value)}><span className="choice-number">{workspaceOptions.indexOf(option) + 1}</span><span><strong>{option.label}</strong><small>{option.description}</small></span><span className="choice-check">{workspaceType === option.value ? '✓' : ''}</span></button>)}</div>}
+
+              {step === 2 && <div className="onboarding-field-wrap"><label className="field"><span>Website URL</span><input value={website} onChange={(event) => setWebsite(event.target.value)} placeholder="https://yourwebsite.com" type="url" /></label><div className="onboarding-hint"><span>⌁</span><div><strong>Why we ask</strong><p>Contentra can use your website to understand what you do, who you serve, and how your brand is positioned.</p></div></div></div>}
+
+              {step === 3 && <label className="field onboarding-textarea"><span>What do you create or what does your business do?</span><textarea value={niche} onChange={(event) => setNiche(event.target.value)} rows={7} placeholder="Tell us about your niche, product, service, or content..." /><small>Be as specific as you want. A few useful sentences are enough.</small></label>}
+              {step === 4 && <label className="field onboarding-textarea"><span>Who are you trying to reach?</span><textarea value={audience} onChange={(event) => setAudience(event.target.value)} rows={7} placeholder="Describe your ideal audience..." /><small>Think about who gets the most value from what you create.</small></label>}
+              {step === 5 && <div className="onboarding-select-wrap"><p className="onboarding-select-label">Choose everything that matters to you</p><div className="onboarding-chip-grid">{goalOptions.map((goal) => <button type="button" className={'onboarding-chip ' + (goals.includes(goal) ? 'selected' : '')} key={goal} onClick={() => toggleGoal(goal)}><span>{goals.includes(goal) ? '✓' : '+'}</span>{goal}</button>)}</div></div>}
+              {step === 6 && <div className="onboarding-select-wrap"><p className="onboarding-select-label">Where do you want to grow?</p><div className="onboarding-chip-grid platform-grid">{platformOptions.map((platform) => <button type="button" className={'onboarding-chip ' + (platforms.includes(platform) ? 'selected' : '')} key={platform} onClick={() => togglePlatform(platform)}><span>{platforms.includes(platform) ? '✓' : '+'}</span>{platform}</button>)}</div></div>}
+              {step === 7 && <label className="field onboarding-textarea"><span>How should your content feel?</span><textarea value={tone} onChange={(event) => setTone(event.target.value)} rows={7} placeholder="For example: direct, educational, confident, funny, minimal..." /><small>This helps Contentra keep your voice consistent.</small></label>}
+              {step === 8 && <div className="onboarding-connect"><div className="connect-visual"><span>◎</span><span>+</span><span>◉</span></div><h3>Connect when you're ready.</h3><p>Social connections bring real performance context into Contentra. You can skip this step and connect accounts later from your workspace.</p><button type="button" className="onboarding-skip" onClick={next}>Skip for now</button></div>}
+              {step === 9 && <div className="onboarding-ready"><div className="ready-icon">✓</div><span className="section-label">Setup complete</span><h3>Your workspace is ready.</h3><p>Contentra now has the context it needs to make recommendations around your business, audience, goals, platforms, and brand direction.</p><div className="ready-summary"><span>{workspaceType.replace('_', ' ')}</span>{website && <span>Website added</span>}{goals.length > 0 && <span>{goals.length} goals</span>}{platforms.length > 0 && <span>{platforms.length} platforms</span>}</div></div>}
+
+              <div className="onboarding-actions">
+                {step > 0 ? <Button variant="secondary" onClick={back} disabled={saving}>Back</Button> : <span />}
+                {step === 9 ? <Button onClick={async () => { const saved = await save(9, true); if (saved) window.location.assign('/home'); }} disabled={saving}>{saving ? 'Saving...' : 'Open Contentra'}</Button> : <Button onClick={next} disabled={saving || !workspaceId}>{saving ? 'Saving...' : step === 8 ? 'Continue' : 'Continue'}</Button>}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
