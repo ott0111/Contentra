@@ -22,6 +22,11 @@ type OnboardingState = {
   completed?: boolean;
 };
 
+type OnboardingResponse = {
+  state?: OnboardingState;
+  completedAt?: string | null;
+};
+
 type WorkspaceMembership = {
   role: string;
   workspace: {
@@ -155,13 +160,15 @@ export default function Onboarding() {
 
     const restore = async (id: string) => {
       try {
-        const state = await api<OnboardingState>(
+        const response = await api<OnboardingResponse>(
           `/api/v1/workspaces/${id}/onboarding`,
           {},
           id,
         );
 
         if (cancelled) return;
+
+        const state = response.state ?? {};
 
         setWorkspaceId(id);
         setStep(Math.min(state.currentStep ?? 0, steps.length - 1));
@@ -301,10 +308,7 @@ export default function Onboarding() {
       steps.length - 1,
     );
 
-    const saved = await save(
-      nextStep,
-      nextStep === steps.length - 1,
-    );
+    const saved = await save(nextStep, false);
 
     if (saved) {
       setStep(nextStep);
@@ -598,9 +602,12 @@ export default function Onboarding() {
 
             {step === 9 ? (
               <Button
-                href="/home"
-                onClick={() => {
-                  void save(9, true);
+                onClick={async () => {
+                  const saved = await save(9, true);
+
+                  if (saved) {
+                    window.location.assign("/home");
+                  }
                 }}
                 disabled={saving}
               >
