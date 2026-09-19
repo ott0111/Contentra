@@ -7,7 +7,7 @@ import { api, ApiClientError } from '@/lib/api';
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export function Button({ children, href, variant = 'primary', type = 'button', onClick, disabled = false, ariaLabel }: { children: React.ReactNode; href?: string; variant?: Variant; type?: 'button' | 'submit'; onClick?: () => void; disabled?: boolean; ariaLabel?: string }) {
   const cls = `btn btn-${variant}`;
-  if (href) return <Link className={cls} href={href} onClick={onClick} aria-label={ariaLabel}>{children}<ArrowRight size={16} /></Link>;
+  if (href) return <Link className={cls} href={href} onClick={onClick} aria-label={ariaLabel}>{children}</Link>;
   return <button className={cls} type={type} onClick={onClick} disabled={disabled} aria-label={ariaLabel}>{children}</button>;
 }
 export function Card({ children, className = '', style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) { return <section className={`card ${className}`} style={style}>{children}</section> }
