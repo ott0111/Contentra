@@ -541,44 +541,98 @@ export async function registerRoutes(app: FastifyInstance) {
       });
     },
   );
-  app.put(
-    "/api/v1/workspaces/:workspaceId/onboarding",
-    async (request, reply) => {
-      const ctx = await workspaceAuth(request, reply, "workspace.update");
-      if (!ctx) return;
+app.put(
+  "/api/v1/workspaces/:workspaceId/onboarding",
+  async (request, reply) => {
+    const ctx = await workspaceAuth(request, reply, "workspace.update");
+    if (!ctx) return;
+
+    try {
       const input = onboardingStateSchema.parse(request.body);
+
       const workspace = await prisma.workspace.update({
         where: { id: ctx.workspaceId },
         data: {
-          ...(input.workspaceType ? { type: input.workspaceType } : {}),
-          onboardingState: input as never,
-          onboardedAt: input.completed ? new Date() : undefined,
+          ...(input.workspaceType
+            ? { type: input.workspaceType }
+            : {}),
+          onboardingState: input as Prisma.InputJsonValue,
+          onboardedAt: input.completed
+            ? new Date()
+            : undefined,
+        },
+        select: {
+          onboardingState: true,
+          onboardedAt: true,
         },
       });
-      await prisma.auditLog.create({
-        data: {
-          workspaceId: ctx.workspaceId,
-          userId: ctx.session.user.id,
-          action: input.completed ? "onboarding.completed" : "onboarding.saved",
-          entityType: "workspace",
-          entityId: ctx.workspaceId,
-        },
-      });
-      // Granting the referral reward is idempotent (CAS on PENDING) and also
-      // acts as the funnel "referral.completed" event for the referring side.
-      if (input.completed) {
-        await completeReferralAndReward({
-          workspaceId: ctx.workspaceId,
-          referredUserId: ctx.session.user.id,
+
+      // Audit logging should never prevent onboarding from being saved.
+      try {
+        await prisma.auditLog.create({
+          data: {
+            workspaceId: ctx.workspaceId,
+            userId: ctx.session.user.id,
+            action: input.completed
+              ? "onboarding.completed"
+              : "onboarding.saved",
+            entityType: "workspace",
+            entityId: ctx.workspaceId,
+          },
         });
+      } catch (error) {
+        request.log.warn(
+          { err: error, workspaceId: ctx.workspaceId },
+          "onboarding audit log failed",
+        );
       }
+
+      if (input.completed) {
+        try {
+          await completeReferralAndReward({
+            workspaceId: ctx.workspaceId,
+            referredUserId: ctx.session.user.id,
+          });
+        } catch (error) {
+          request.log.warn(
+            { err: error, workspaceId: ctx.workspaceId },
+            "onboarding referral completion failed",
+          );
+        }
+      }
+
       return json(reply, {
         state: workspace.onboardingState,
         completedAt: workspace.onboardedAt,
       });
-    },
-  );
-  app.get(
+    } catch (error) {
+      request.log.error(
+        {
+          err: error,
+          workspaceId: ctx.workspaceId,
+        },
+        "onboarding save failed",
+      );
+
+      if (error instanceof ZodError) {
+        return fail(
+          reply,
+          400,
+          "VALIDATION_ERROR",
+          "One or more onboarding fields are invalid.",
+          error.flatten(),
+        );
+      }
+
+      return fail(
+        reply,
+        500,
+        "ONBOARDING_SAVE_FAILED",
+        "We could not save your onboarding progress.",
+      );
+    }
+  },
+);
     "/api/v1/workspaces/:workspaceId/referral",
     async (request, reply) => {
       const ctx = await workspaceAuth(request, reply, "workspace.read");
