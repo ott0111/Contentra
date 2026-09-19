@@ -28,3 +28,8 @@ button{border-radius:11px;padding:10px 15px;box-shadow:none}button:not(:disabled
 input,textarea,select{border-radius:12px;background:#fff}textarea{line-height:1.55}.create{border-radius:20px}.release-notice{border-radius:14px}
 aside{padding:24px 14px}aside button{padding:10px 12px}aside button.selected{background:rgba(255,106,0,.16)}
 @media(max-width:750px){main{padding:24px 18px 70px}h1{font-size:31px}}
+
+/* Shared Contentra premium interaction layer */
+:root{--contentra-glass:rgba(255,255,255,.78);--contentra-shadow:0 18px 60px rgba(17,17,17,.10)}
+.panel,.card,.surface-panel{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.panel:hover,.card:hover,.surface-panel:hover{transform:translateY(-2px);box-shadow:var(--contentra-shadow)}
