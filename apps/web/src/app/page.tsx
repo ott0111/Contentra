@@ -1,235 +1,73 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { BarChart3, RefreshCw, Search, Share2, Sparkles, TrendingUp } from 'lucide-react';
-import { Button, Card } from '@/components/ui';
-import { api, ApiClientError } from '@/lib/api';
+import { ArrowRight, BarChart3, Check, ChevronRight, Lightbulb, RefreshCw, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import { api } from '@/lib/api';
+import { MarketingShell } from '@/components/marketing-shell';
 
-type Me = {
-  workspaces: Array<{ workspace: { id: string; onboardedAt: string | null } }>;
-};
-
-type Analysis = {
-  url: string;
-  title: string | null;
-  description: string | null;
-  wordCount: number;
-  readMinutes: number;
-  headings: { h1: number; h2: number };
-  images: number;
-  links: number;
-  hasOpenGraph: boolean;
-};
-
+type Me = { workspaces: Array<{ workspace: { id: string; onboardedAt: string | null } }> };
 const features = [
-  { t: 'Create Better Content', d: 'Generate content ideas, hooks, posts, scripts, and formats built around your brand and audience.', Icon: Sparkles },
-  { t: 'Discover What\u2019s Trending', d: 'Find emerging trends and proven content opportunities before they pass you by.', Icon: TrendingUp },
-  { t: 'Remix What Works', d: 'Turn proven content into new ideas tailored to your niche, brand, and audience.', Icon: RefreshCw },
-  { t: 'Publish Everywhere', d: 'Plan, organize, and publish your content across your connected social platforms from one place.', Icon: Share2 },
-  { t: 'Understand Your Growth', d: 'Track your content performance and turn your analytics into clear next actions.', Icon: BarChart3 },
+  { icon: Lightbulb, title: 'Know what to make', body: 'Turn your brand, audience, goals, and performance into ideas worth acting on.' },
+  { icon: Sparkles, title: 'Create with context', body: 'Generate content around your actual business instead of starting from a blank prompt.' },
+  { icon: RefreshCw, title: 'Remix what works', body: 'Turn proven ideas into new formats, hooks, angles, and platform-native content.' },
+  { icon: TrendingUp, title: 'See what is moving', body: 'Understand trends and opportunities before your content calendar goes stale.' },
+  { icon: BarChart3, title: 'Understand growth', body: 'Bring performance into one place and connect numbers to your next action.' },
+  { icon: Zap, title: 'Move faster', body: 'Keep strategy, creation, planning, and execution in one operating system.' },
 ];
-
-function trackFunnel(event: string, extra: Record<string, unknown> = {}) {
-  void api('/api/v1/public/funnel-events', {
-    method: 'POST',
-    body: JSON.stringify({ event, ...extra }),
-  }).catch(() => undefined);
-}
+function track(event: string) { void api('/api/v1/public/funnel-events', { method: 'POST', body: JSON.stringify({ event }) }).catch(() => undefined); }
 
 export default function Root() {
-  const [anon, setAnon] = useState(false);
-  const [ref, setRef] = useState('');
-  const [url, setUrl] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [result, setResult] = useState<Analysis | null>(null);
+  const [ready, setReady] = useState(false);
   const tracked = useRef(false);
-
-  useEffect(() => {
-    const value = new URLSearchParams(window.location.search).get('ref');
-    if (value) setRef(value.trim().toUpperCase());
-  }, []);
-
   useEffect(() => {
     let mounted = true;
-    api<Me>('/api/v1/auth/me')
-      .then((data) => {
-        if (!mounted) return;
-        const saved = localStorage.getItem('contentra_workspace');
-        const selected =
-          data.workspaces.find((x) => x.workspace.id === saved)?.workspace ??
-          data.workspaces[0]?.workspace;
-        // A signed-in visitor keeps the original routing; the landing only
-        // replaces the logged-out experience.
-        if (!selected) window.location.assign('/app');
-        else if (!selected.onboardedAt) window.location.assign('/onboarding');
-        else window.location.assign('/app');
-      })
-      .catch(() => {
-        if (mounted) setAnon(true);
-      });
-    return () => {
-      mounted = false;
-    };
+    api<Me>('/api/v1/auth/me').then((data) => {
+      if (!mounted) return;
+      const saved = localStorage.getItem('contentra_workspace');
+      const selected = data.workspaces.find((x) => x.workspace.id === saved)?.workspace ?? data.workspaces[0]?.workspace;
+      if (!selected) window.location.assign('/app');
+      else if (!selected.onboardedAt) window.location.assign('/onboarding');
+      else window.location.assign('/home');
+    }).catch(() => mounted && setReady(true));
+    return () => { mounted = false; };
   }, []);
-
-  useEffect(() => {
-    if (!anon || tracked.current) return;
-    tracked.current = true;
-    trackFunnel('landing.view', ref ? { ref } : {});
-  }, [anon, ref]);
-
-  async function analyze(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const value = url.trim();
-    if (!value) return;
-    setBusy(true);
-    setError('');
-    setResult(null);
-    trackFunnel('analyzer.run', { meta: { url: value } });
-    try {
-      const data = await api<Analysis>('/api/v1/public/analyze-url', {
-        method: 'POST',
-        body: JSON.stringify({ url: value }),
-      });
-      setResult(data);
-      trackFunnel('analyzer.result', { meta: { url: value } });
-    } catch (err) {
-      // Never fabricate a result: surface the API's honest error instead.
-      setError(
-        err instanceof ApiClientError
-          ? err.message
-          : 'We could not reach the analyzer right now. Please try again shortly.',
-      );
-      trackFunnel('analyzer.error', { meta: { url: value } });
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  const signupHref = ref ? `/signup?ref=${encodeURIComponent(ref)}` : '/signup';
-
+  useEffect(() => { if (ready && !tracked.current) { tracked.current = true; track('landing.view'); } }, [ready]);
+  if (!ready) return null;
   return (
-    <main className="auth-split">
-      <section className="auth-left">
-        <Link href="/" className="auth-brand">
-          <span className="brand-mark" aria-hidden="true" />
-          Contentra
-        </Link>
-        <div className="auth-left-copy">
-          <span className="badge">For creators who want to grow</span>
-          <h1>The operating system for creators</h1>
-          <p>
-            Contentra helps creators plan, create, and understand their content —
-            so you always know what is working and exactly what to make next.
-          </p>
-          <div className="auth-features">
-            {features.map((f) => (
-              <div className="auth-feature" key={f.t}>
-                <span className="auth-feature-icon">
-                  <f.Icon size={16} aria-hidden="true" />
-                </span>
-                <div>
-                  <h3>{f.t}</h3>
-                  <p>{f.d}</p>
+    <MarketingShell>
+      <main className="marketing-main">
+        <section className="hero-section">
+          <div className="hero-copy">
+            <div className="hero-kicker"><span className="hero-kicker-dot" /> The operating system for creators</div>
+            <h1>Stop guessing what to post.<br /><span>Know what to do next.</span></h1>
+            <p className="hero-subtitle">Contentra connects your business, content, audience, and performance so you can plan smarter, create faster, and keep growing.</p>
+            <div className="hero-actions"><Link href="/signup" className="btn btn-primary btn-large">Start for free <ArrowRight size={16} /></Link><Link href="#product" className="hero-secondary">Explore Contentra <ChevronRight size={15} /></Link></div>
+            <div className="hero-proof"><span><Check size={13} /> Free to get started</span><span><Check size={13} /> Built for creators, businesses & agencies</span><span><Check size={13} /> No credit card required</span></div>
+          </div>
+          <div className="hero-product">
+            <div className="product-window">
+              <div className="window-top"><div className="window-brand"><span className="mini-mark" /> Contentra</div><div className="window-status"><span /> Workspace</div></div>
+              <div className="window-body">
+                <div className="window-heading"><div><span className="window-eyebrow">Daily brief</span><h3>Your next move is clear.</h3><p>Your audience is responding to educational content. Double down on the format this week.</p></div><span className="window-badge">Next best action</span></div>
+                <div className="window-metrics"><div><small>Views</small><strong>128.4K</strong><span>+18.2%</span></div><div><small>Reach</small><strong>84.7K</strong><span>+12.4%</span></div><div><small>Engagement</small><strong>7.8%</strong><span>+2.1%</span></div></div>
+                <div className="window-grid">
+                  <div className="window-card large"><div className="window-card-head"><strong>Opportunities</strong><span>3 found</span></div>
+                    <div className="fake-row"><span className="fake-icon">↗</span><div><b>Turn your strongest topic into a series</b><small>High relevance · Instagram</small></div><ArrowRight size={14} /></div>
+                    <div className="fake-row"><span className="fake-icon">✦</span><div><b>Remix your top performing hook</b><small>Medium effort · TikTok</small></div><ArrowRight size={14} /></div>
+                    <div className="fake-row"><span className="fake-icon">◌</span><div><b>Build around a rising conversation</b><small>Fresh signal · X</small></div><ArrowRight size={14} /></div>
+                  </div>
+                  <div className="window-card"><div className="window-card-head"><strong>Content</strong><span>Recent</span></div><div className="mini-content"><span className="content-thumb one" /><div><b>3 lessons I learned...</b><small>Instagram · Published</small></div></div><div className="mini-content"><span className="content-thumb two" /><div><b>Why most creators...</b><small>TikTok · Draft</small></div></div></div>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="landing-cta">
-            <Button href={signupHref}>Create your free account</Button>
-            <Link href="/login" className="text-btn">
-              Sign in
-            </Link>
-          </div>
-          {ref && (
-            <p className="auth-claim" style={{ marginTop: 14 }}>
-              Referral <strong>{ref}</strong> applied — your friend&apos;s reward
-              unlocks once you finish setup.
-            </p>
-          )}
-        </div>
-        <p className="auth-claim">Your Content. Your Growth. One Operating System.</p>
-      </section>
-      <section className="auth-right">
-        <div className="auth-right-card">
-          <h1>Analyze any public page — no signup</h1>
-          <p>
-            Paste a URL to see basic content signals from any public page. It is
-            free, instant, and honest about what it can and cannot reach.
-          </p>
-          <form className="form" onSubmit={analyze}>
-            <label className="field">
-              <span>Website URL</span>
-              <input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                type="url"
-                inputMode="url"
-                autoComplete="url"
-                placeholder="https://example.com"
-                required
-              />
-            </label>
-            <Button type="submit" disabled={busy}>
-              {busy ? 'Analyzing…' : 'Analyze website'}
-            </Button>
-          </form>
-          {error && (
-            <div
-              className="empty"
-              role="alert"
-              style={{ padding: 12, marginTop: 16, color: 'var(--danger)' }}
-            >
-              {error}
             </div>
-          )}
-          {result && (
-            <div data-testid="analyzer-result">
-              <Card
-                className="landing-result"
-                style={{ marginTop: 16 }}
-              >
-                <div className="card-top">
-                  <span className="badge">Analysis</span>
-                  <span className="muted">{result.readMinutes} min read</span>
-                </div>
-                <h3>{result.title ?? 'Untitled page'}</h3>
-                {result.description && <p>{result.description}</p>}
-                <div className="grid grid-2" style={{ marginTop: 14 }}>
-                  <div className="metric">
-                    <span>Words</span>
-                    <strong>{result.wordCount}</strong>
-                  </div>
-                  <div className="metric">
-                    <span>Headings</span>
-                    <strong>
-                      H1 {result.headings.h1} · H2 {result.headings.h2}
-                    </strong>
-                  </div>
-                  <div className="metric">
-                    <span>Images</span>
-                    <strong>{result.images}</strong>
-                  </div>
-                  <div className="metric">
-                    <span>Links</span>
-                    <strong>{result.links}</strong>
-                  </div>
-                </div>
-                <p className="muted" style={{ marginTop: 12 }}>
-                  {result.hasOpenGraph
-                    ? 'Open Graph tags detected — this page is ready to share.'
-                    : 'No Open Graph tags detected — share previews may be weaker.'}
-                </p>
-              </Card>
-            </div>
-          )}
-          <p className="auth-foot">
-            <Search size={12} aria-hidden="true" /> Sign up to save analyses and
-            turn them into a content plan.
-          </p>
-        </div>
-      </section>
-    </main>
+            <div className="hero-glow" />
+          </div>
+        </section>
+        <section className="logo-strip"><span>One workspace for the entire content loop</span><div><b>IDEAS</b><i>→</i><b>CREATE</b><i>→</i><b>ANALYZE</b><i>→</i><b>NEXT ACTION</b></div></section>
+        <section id="product" className="marketing-section"><div className="section-intro"><span className="section-label">One system</span><h2>Everything your growth workflow needs.<br />Nothing you have to stitch together.</h2><p>Contentra gives your team one place to understand the business, make better content, and turn performance into action.</p></div><div className="feature-grid">{features.map((feature) => <div className="feature-card" key={feature.title}><span className="feature-icon"><feature.icon size={18} /></span><h3>{feature.title}</h3><p>{feature.body}</p><span className="feature-arrow"><ArrowRight size={15} /></span></div>)}</div></section>
+        <section id="how-it-works" className="workflow-section"><div className="workflow-copy"><span className="section-label">How it works</span><h2>From context to action in one continuous loop.</h2><p>Instead of another blank AI chat, Contentra builds a working model of your brand and uses it across the product.</p><Link href="/signup" className="text-link">Build your workspace <ArrowRight size={14} /></Link></div><div className="workflow-steps"><div><span>01</span><div><b>Connect your context</b><p>Tell Contentra what you do, who you serve, and where you publish.</p></div></div><div><span>02</span><div><b>Build your content system</b><p>Create, remix, organize, and plan without losing the strategy behind it.</p></div></div><div><span>03</span><div><b>Learn from performance</b><p>See what is working and let the next recommendation reflect the evidence.</p></div></div></div></section>
+        <section className="cta-section"><div><span className="section-label">Start building</span><h2>Your content deserves a system.</h2><p>Set up your Contentra workspace and get your first recommendations working around your actual goals.</p></div><Link href="/signup" className="btn btn-primary btn-large">Create your workspace <ArrowRight size={16} /></Link></section>
+      </main>
+    </MarketingShell>
   );
 }
