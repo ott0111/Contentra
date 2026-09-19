@@ -8,6 +8,7 @@ const resources = [
   ['Brand Kit', 'Contentra logos, colors, marks, and brand resources.', '/brandkit', Palette],
   ['Terms', 'Read the terms that govern use of Contentra.', '/terms', FileText],
   ['Privacy', 'Learn how Contentra handles information and privacy.', '/privacy', ShieldCheck],
+  ['Legal', 'Find Contentra terms, privacy, and other legal information.', '/legal', FileText],
 ] as const;
 
 export default function ResourcesPage() {
